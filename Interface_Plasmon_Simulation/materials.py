@@ -46,7 +46,8 @@ class material():
         self.density=density #[g/cm^3]
         self.A=mass*u#[kg]
         #self.n=self.valance*self.density*10**3/self.A #[1/m^3]
-        self.n=self.valance*(np.size(self.lattice,axis=1)+1)/(self.a1*self.a2*self.a3)*self.dz
+        self.na = (np.size(self.lattice,axis=1)+1)/(self.a1*self.a2*self.a3) #atoms/[m]^3
+        self.n=self.valance*self.na*self.dz #e-/[m]^3
         self.omegaP=sp.sqrt(self.n*e**2/(eps0*m0)) #[1/s]
         self.energyP=sp.sqrt(self.n*e**2/(eps0*m0))*hbar #[eV]
         self.Ep_inf = sp.sqrt(self.n*e**2/(eps0*m0))*hbar #[eV]
@@ -59,14 +60,14 @@ class material():
         if q is None:
             self.Ep = self.Ep_inf
         else:
-            q = q[:,None]
+            q = q#[:,None]
             alpha = 3* self.E_fermi / (5*self.Ep_inf) * (1-(self.Ep_inf/(4*self.E_fermi))**2)
             self.Ep = self.Ep_inf + alpha* (hbar**2/m0) * q**2 *e #*e makes [eV]
     def set_eps(self, E=None):
         if E is not None:
             self.eps = 1 - self.Ep**2/(E**2-(self.energyB)**2+1j*E*self.damp*hbar)#unitless
 
-Al=material(name="Al", a1=0.4046E-9, valance=3, dE=0.66, r=0.118E-9,density=2.702, mass=26.9815385)
+Al=material(name="Al", a1=0.4046E-9, valance=3, dE=0.66, r=0.118E-9, density=2.702, mass=26.9815385)
 
 #da=0.1E-10#[m]
 #GB=material(Al, a1=Al.a1+da, a2=Al.a1, a3=Al.a3, dE=5)
