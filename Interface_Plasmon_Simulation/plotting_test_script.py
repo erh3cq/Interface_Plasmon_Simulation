@@ -8,7 +8,7 @@ Created on Thu Mar 23 18:01:15 2017
 import numpy as np
 from materials import Al, GB, vac
 from microscope import microscope
-from Bulk_plasmon import bulk_plasmon_double_differential_cross_section
+from Bulk_Plasmon import bulk_plasmon_double_differential_cross_section
 from normal_incidence_wRetardation import double_differential_cross_section_normalIncidence
 
 
@@ -23,7 +23,7 @@ class create_spectrum():
 MR_Spectra = double_differential_cross_section_normalIncidence(microscope(),create_spectrum(),[vac,Al],10E-9)
 
 import matplotlib.pyplot as plt
-fig, ax= plt.subplots(3,1)
+fig, ax= plt.subplots(4,1)
 
 im = ax[0].imshow(MR_Spectra.bulk_mode(), origin='lower', aspect='auto', cmap=plt.get_cmap('hot'),
            extent=[1,20,0,4E10*10**-10])
@@ -39,12 +39,21 @@ ax[1].set_title('Surface')
 ax[1].set_ylabel(r'$q_y [A^-]$')
 ax[1].set_xlabel(r'$E [eV]$')
 
-im = ax[2].imshow(MR_Spectra.total(), origin='lower', aspect='auto', cmap=plt.get_cmap('hot'),
+im = ax[2].imshow(MR_Spectra.guidedLight1(), origin='lower', aspect='auto', cmap=plt.get_cmap('hot'),
            extent=[1,20,0,4E10*10**-10])
 fig.colorbar(im, ax=ax[2], label=r'$\frac{dP^3}{dz dE dq_y} \left[ \frac{1}{eV nm}\right] $')
-ax[2].set_title('Total')
+ax[2].set_title('Guided light 1')
 ax[2].set_ylabel(r'$q_y [A^-]$')
 ax[2].set_xlabel(r'$E [eV]$')
+
+im = ax[-1].imshow(MR_Spectra.total(), origin='lower', aspect='auto', cmap=plt.get_cmap('hot'),
+           extent=[1,20,0,4E10*10**-10])
+fig.colorbar(im, ax=ax[-1], label=r'$\frac{dP^3}{dz dE dq_y} \left[ \frac{1}{eV nm}\right] $')
+ax[-1].set_title('Total')
+ax[-1].set_ylabel(r'$q_y [A^-]$')
+ax[-1].set_xlabel(r'$E [eV]$')
+
+
 
 
 plt.show()
