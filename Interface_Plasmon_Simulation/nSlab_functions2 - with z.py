@@ -283,7 +283,7 @@ z = np.linspace(0, thickness, num=6)[:, None, None, None]
 
 minE, maxE=5, 25
 energy = np.arange(minE, maxE, microscope.resolution)
-q_perpendicular = np.linspace(0,microscope.k0*microscope.collection_angle,200)#np.arange(0,1E10,1E5)
+q_perpendicular = np.linspace(0,microscope.k0*microscope.collection_angle,200)[:,None]#np.arange(0,1E10,1E5)
 
 
 from materials import Al, GB, vac

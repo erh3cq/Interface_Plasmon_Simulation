@@ -32,33 +32,38 @@ class double_differential_cross_section_normalIncidence():
         for i, material in enumerate(materials):
             material.set_Ep(q=spectrum.q_perp)
             material.set_eps(E=spectrum.E)
-            self.eps.append(np.nan_to_num(np.conjugate(material.eps)))
+            self.eps.append(np.conjugate(material.eps))
         self.t = t
-        print(self.eps[0])
-        self.mu2 = 1 - self.eps[0] * (microscope.v/c)**2
+        
+        self.mu2 = 1 - self.eps[1] * (microscope.v/c)**2
         
         ###Angular terms
         self.theta2 = (spectrum.q_perp/microscope.k0)**2
         self.thetaE2 = (spectrum.E/(hbar*microscope.v))**2
-        self.lambda2 = self.theta2 - self.eps[0] * self.thetaE2 * (microscope.v/c)**2
-        self.lambda02 = self.theta2 - self.eps[1] * self.thetaE2 * (microscope.v/c)**2
+        self.lambda2 = self.theta2 - self.eps[1] * self.thetaE2 * (microscope.v/c)**2
+        self.lambda02 = self.theta2 - self.eps[0] * self.thetaE2 * (microscope.v/c)**2
         self.phi2 = self.lambda2 + self.thetaE2
         self.phi02 = self.lambda02 + self.thetaE2
-        self.phi2_01 = self.theta2 + self.thetaE2 * (1 - (self.eps[0] - self.eps[1]) * (microscope.v/c)**2)
+        self.phi2_01 = self.theta2 + self.thetaE2 * (1 - (self.eps[1] - self.eps[0]) * (microscope.v/c)**2)
         
-        self.de = np.pi * self.t * spectrum.E / (hbar * microscope.v)
-        self.Lp = np.sqrt(self.lambda02) * self.eps[0] + np.sqrt(self.lambda2) * self.eps[1] * np.tanh(np.sqrt(self.lambda2/self.thetaE2) * self.de)
-        self.Lm = np.sqrt(self.lambda02) * self.eps[0] + np.sqrt(self.lambda2) * self.eps[1] / np.tanh(np.sqrt(self.lambda2/self.thetaE2) * self.de)
+        self.de = self.t * spectrum.E / (2*hbar * microscope.v)
+        self.Lp = np.sqrt(self.lambda02) * self.eps[1] + np.sqrt(self.lambda2) * self.eps[0] * np.tanh(np.sqrt(self.lambda2/self.thetaE2) * self.de)
+        self.Lm = np.sqrt(self.lambda02) * self.eps[1] + np.sqrt(self.lambda2) * self.eps[0] / np.tanh(np.sqrt(self.lambda2/self.thetaE2) * self.de)
         
         
         self.A = 1/(np.pi * a0 * m0c2 * (microscope.v/c)**2) #[m^2/eV]
-        self.B = -2 * self.theta2 * (self.eps[0] - self.eps[1])**2 / (microscope.k0 * self.phi02 * self.phi2)
+        self.B = -2 * self.theta2 * (self.eps[1] - self.eps[0])**2 / (microscope.k0 * self.phi02 * self.phi2)
+        print('theta2',self.theta2)
+        print('diff',((self.eps[1] - self.eps[0])**2)[0,0])
+        print('denom',1/(microscope.k0))
+        print('B',self.B[0,0])
         
     def bulk_mode(self):
-        return self.A * np.imag(self.t * self.mu2 / (self.eps[0] * self.phi2))
+        return self.A * np.imag(self.t * self.mu2 / (self.eps[1] * self.phi2))
     
     def surface_mode(self):
-        return self.A * np.imag(self.B * self.phi2_01**4/(self.eps[0]*self.eps[1]) * 
-                                                          np.sin(self.de)**2/self.Lp + np.cos(self.de)**2/self.Lm)
+        print('B2',(self.phi2_01[0,0]**2 / self.eps[1]*self.eps[0])[0,0])
+        return self.A * np.imag(self.B * self.phi2_01**2 / (self.eps[1]*self.eps[0])
+                                * (np.sin(self.de)**2/self.Lp + np.cos(self.de)**2/self.Lm))
     def total(self):
-        self.bulk_mode() + self.surface_mode()
+        return self.bulk_mode() + self.surface_mode()

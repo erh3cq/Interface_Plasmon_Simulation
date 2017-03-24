@@ -17,17 +17,34 @@ scope = microscope()
 class create_spectrum():
     def __init__(self):
         self.q_perp = np.linspace(-3E10,3E10,400)[:,None]#microscope.k0*microscope.collection_angle
-        self.E = np.linspace(10,20,100)
+        self.E = np.linspace(1,20,200)
 
 #MR_Spectra = bulk_plasmon_double_differential_cross_section(microscope(),create_spectrum(),Al)
-MR_Spectra = double_differential_cross_section_normalIncidence(microscope(),create_spectrum(),[vac,Al],300E9)
-print(vac.E_fermi)
+MR_Spectra = double_differential_cross_section_normalIncidence(microscope(),create_spectrum(),[vac,Al],10E-9)
+
 import matplotlib.pyplot as plt
-fig, ax= plt.subplots()
-plt.imshow(MR_Spectra.surface_mode(),origin='lower', aspect='auto', cmap=plt.get_cmap('hot'),
-           extent=[10,20,0,4E10*10**-10])
-plt.colorbar(label=r'$\frac{dP^3}{dz dE dq_y} \left[ \frac{1}{eV nm}\right] $')
-plt.title('Bulk')
-plt.ylabel(r'$q_y [A^-]$')
-plt.xlabel(r'$E [eV]$')
+fig, ax= plt.subplots(3,1)
+
+im = ax[0].imshow(MR_Spectra.bulk_mode(), origin='lower', aspect='auto', cmap=plt.get_cmap('hot'),
+           extent=[1,20,0,4E10*10**-10])
+fig.colorbar(im, ax=ax[0], label=r'$\frac{dP^3}{dz dE dq_y} \left[ \frac{1}{eV nm}\right] $')
+ax[0].set_title('Bulk')
+ax[0].set_ylabel(r'$q_y [A^-]$')
+ax[0].set_xlabel(r'$E [eV]$')
+
+im = ax[1].imshow(MR_Spectra.surface_mode(), origin='lower', aspect='auto', cmap=plt.get_cmap('hot'),
+           extent=[1,20,0,4E10*10**-10])
+fig.colorbar(im, ax=ax[1], label=r'$\frac{dP^3}{dz dE dq_y} \left[ \frac{1}{eV nm}\right] $')
+ax[1].set_title('Surface')
+ax[1].set_ylabel(r'$q_y [A^-]$')
+ax[1].set_xlabel(r'$E [eV]$')
+
+im = ax[2].imshow(MR_Spectra.total(), origin='lower', aspect='auto', cmap=plt.get_cmap('hot'),
+           extent=[1,20,0,4E10*10**-10])
+fig.colorbar(im, ax=ax[2], label=r'$\frac{dP^3}{dz dE dq_y} \left[ \frac{1}{eV nm}\right] $')
+ax[2].set_title('Total')
+ax[2].set_ylabel(r'$q_y [A^-]$')
+ax[2].set_xlabel(r'$E [eV]$')
+
+
 plt.show()
