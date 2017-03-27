@@ -13,6 +13,7 @@ hbar=6.582E-16#[eV s]   1.055E-34[J s]
 u=1.660539040E-27
 e=1.6E-19 #[C]
 m0=9.11E-31#[kg]
+m0c2=511E3#[eV]
 eps0=8.85E-12#[C^2/N m]
 
 def xtal(xtalType):
@@ -61,8 +62,12 @@ class material():
             self.Ep = self.Ep_inf
         else:
             q = q#[:,None]
-            alpha = np.nan_to_num(3* self.E_fermi / (5*self.Ep_inf) * (1-(self.Ep_inf/(4*self.E_fermi))**2))
-            self.Ep = self.Ep_inf + alpha* (hbar**2/m0) * q**2 *e #*e makes [eV]
+            #alpha = np.nan_to_num(3* self.E_fermi / (5*self.Ep_inf) * (1-(self.Ep_inf/(4*self.E_fermi))**2))
+            alpha = np.nan_to_num(3* self.E_fermi / (5*self.Ep_inf))
+            self.Ep = self.Ep_inf + alpha* (hbar**2/m0c2) * q**2 #*e makes [eV]
+            print('kf',self.kFermi*10E-10)
+            print('ef',self.E_fermi)
+            print('alpha',alpha)
     def set_eps(self, E=None):
         if E is not None:
             self.eps = 1 - self.Ep**2/(E**2-(self.energyB)**2+1j*E*self.damp*hbar)#unitless

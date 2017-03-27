@@ -22,26 +22,27 @@ e=1.602E-19 #[C]
 a0 = 5.292*10**-11 #[m]
 c=3E8#[m/s]
 m0=9.11E-31#[kg]
-m0c2=511.#[keV]
+m0c2=511E3#[eV]
 eps0=8.85E-12#[C^2/N m]
 
 class double_differential_cross_section_normalIncidence():
     def __init__(self,microscope,spectrum,materials, t):
-        self.beta2 = 0#(microscope.v/c)**2
+        self.beta2 = (microscope.v/c)**2
+        self.q_parallel = spectrum.E/(hbar*microscope.v)
         ###set material parameters
         self.eps = []
         for i, material in enumerate(materials):
-            material.set_Ep(q=spectrum.q_perp)
+            material.set_Ep(q=np.sqrt(spectrum.q_perp**2 + self.q_parallel**2))
             material.set_eps(E=spectrum.E)
             self.eps.append(np.conjugate(material.eps))
+            print('Ep_0',material.Ep_inf)
         self.t = t
-        print(self.eps[0][0])
         
         self.mu2 = 1 - self.eps[1] * self.beta2
         
         ###Angular terms
         self.theta2 = (spectrum.q_perp/microscope.k0)**2
-        self.thetaE2 = (spectrum.E/(hbar*microscope.v))**2
+        self.thetaE2 = (spectrum.E/(hbar*microscope.v*microscope.k0))**2
         self.lambda2 = self.theta2 - self.eps[1] * self.thetaE2 * self.beta2
         self.lambda02 = self.theta2 - self.eps[0] * self.thetaE2 * self.beta2
         self.phi2 = self.lambda2 + self.thetaE2
@@ -54,7 +55,7 @@ class double_differential_cross_section_normalIncidence():
         self.Lm = np.sqrt(self.lambda02) * self.eps[1] + np.sqrt(self.lambda2) * self.eps[0] / self.tanh
         
         
-        self.A =1/(np.pi * a0 * m0c2 * (microscope.v/c)**2)  #e**3 / (4*np.pi**3 * hbar**2 * eps0 * microscope.v**2) #[m^2/eV]
+        self.A =e/(np.pi * a0 * m0 * microscope.v**2)  #e**3 / (4*np.pi**3 * hbar**2 * eps0 * microscope.v**2) #[m^2/eV]
         self.B = -2 * self.theta2 * (self.eps[1] - self.eps[0])**2 / (microscope.k0 * (self.phi02 * self.phi2)**2)
         
     def bulk_mode(self):
