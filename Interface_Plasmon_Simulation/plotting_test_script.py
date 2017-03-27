@@ -8,7 +8,7 @@ Created on Thu Mar 23 18:01:15 2017
 import numpy as np
 from materials import Al, GB, vac
 from microscope import microscope
-from Bulk_Plasmon import bulk_plasmon_double_differential_cross_section
+from Bulk_plasmon import bulk_plasmon_double_differential_cross_section
 from normal_incidence_wRetardation import double_differential_cross_section_normalIncidence
 
 
@@ -23,6 +23,14 @@ class create_spectrum():
 MR_Spectra = double_differential_cross_section_normalIncidence(microscope(),create_spectrum(),[vac,Al],10E-9)
 
 import matplotlib.pyplot as plt
+fig, ax = plt.subplots()
+#print(MR_Spectra.eps.real)
+plt.plot(MR_Spectra.eps[1][0].real, label=r'$\epsilon_r q=0$')
+plt.plot(MR_Spectra.eps[1][200].real, label=r'$\epsilon_r q=200$')
+plt.plot(MR_Spectra.eps[1][0].conj().imag, label=r'$\epsilon_i q=0$')
+plt.plot(MR_Spectra.eps[1][200].conj().imag, label=r'$\epsilon_i q=200$')
+plt.legend()
+
 fig, ax= plt.subplots(4,1)
 
 im = ax[0].imshow(MR_Spectra.bulk_mode(), origin='lower', aspect='auto', cmap=plt.get_cmap('hot'),
