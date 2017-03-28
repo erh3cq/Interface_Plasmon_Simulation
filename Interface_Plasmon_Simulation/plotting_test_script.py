@@ -8,7 +8,7 @@ Created on Thu Mar 23 18:01:15 2017
 import numpy as np
 from materials import Al, GB, vac
 from microscope import microscope
-from Bulk_Plasmon import bulk_plasmon_double_differential_cross_section
+from Bulk_plasmon import bulk_plasmon_double_differential_cross_section
 from normal_incidence_wRetardation import double_differential_cross_section_normalIncidence
 
 
@@ -19,11 +19,15 @@ class create_spectrum():
     def __init__(self):
         self.q_perp = np.linspace(-1*q_bound, q_bound,400)[:,None]#microscope.k0*microscope.collection_angle
         self.E = np.linspace(1,20,200)
+dimensions = create_spectrum()
 
 #MR_Spectra = bulk_plasmon_double_differential_cross_section(microscope(),create_spectrum(),Al)
-MR_Spectra = double_differential_cross_section_normalIncidence(microscope(),create_spectrum(),[vac,Al],20*10E-9)
+MR_Spectra = double_differential_cross_section_normalIncidence(scope, dimensions, [vac,Al], 20*10E-9)
 
 import matplotlib.pyplot as plt
+c=3E8#[m/s]
+
+
 fig, ax = plt.subplots()
 #print(MR_Spectra.eps.real)
 plt.plot(MR_Spectra.eps[1][0].real, label=r'$\epsilon_r q=0$')
@@ -80,5 +84,14 @@ fig.colorbar(im, ax=ax, label=r'$\frac{dP^3}{dz dE dq_y} \left[ eV\ nm^{-1} \rig
 ax.set_title('log10 Total')
 ax.set_ylabel(r'$q_y [A^-]$')
 ax.set_xlabel(r'$E [eV]$')
+plt.plot(np.linspace(1,20,200),np.linspace(1,20,200)/c *10**-10,color='b')
+#plt.plot(np.linspace(1,20,200),np.linspace(-1*q_bound, q_bound,200)*10**-10,color='b')
+
+######################################
+######################################
+############   plot Ep(q)  ###########
+######################################
+######################################
+# check that it goes up to ~20-30  ###
 
 plt.show()
