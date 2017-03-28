@@ -12,20 +12,28 @@ from Bulk_plasmon import bulk_plasmon_double_differential_cross_section
 from normal_incidence_wRetardation import double_differential_cross_section_normalIncidence
 
 
-scope = microscope()
+scope = microscope(keV=100)
+scope.print_parameters()
 
-q_bound = 4E10
 class create_spectrum():
-    def __init__(self):
-        self.q_perp = np.linspace(-1*q_bound, q_bound,400)[:,None]#microscope.k0*microscope.collection_angle
-        self.E = np.linspace(1,20,200)
-dimensions = create_spectrum()
+    def __init__(self, q_perp_max=2E10, E_min=5, E_max=20):
+        self.q_perp = np.linspace(-1*q_perp_max, q_perp_max,800)[:,None]#microscope.k0*microscope.collection_angle
+        self.E = np.linspace(E_min,E_max,400)
+
+dimensions = create_spectrum(q_perp_max=2E10, E_min=5, E_max=20)
+print('theta_max: %.4f'%(dimensions.q_perp.max()/scope.k0))
+print('(111) @',2*np.pi/2.338,'[1/A]')
+print()
 
 #MR_Spectra = bulk_plasmon_double_differential_cross_section(microscope(),create_spectrum(),Al)
 MR_Spectra = double_differential_cross_section_normalIncidence(scope, dimensions, [vac,Al], 20*10E-9)
 
 import matplotlib.pyplot as plt
-c=3E8#[m/s]
+def plot_limit_lines():
+    c=3E8#[m/s]
+    e=1.602E-19 #[C]
+    m0=9.11E-31#[kg]
+    plt.plot(np.linspace(dimensions.E.min(), dimensions.E.max(),dimensions.E.size()), np.linspace(dimensions.E.min(), dimensions.E.max(),dimensions.E.size())/(m0*scope.v*c/e)*scope.k0 *10**-10, color='b')
 
 
 fig, ax = plt.subplots()
@@ -37,7 +45,7 @@ plt.plot(MR_Spectra.eps[1][200].conj().imag, label=r'$\epsilon_i q=200$')
 plt.legend()
 
 
-bounds = [1,20,-1*q_bound *10**-10,q_bound *10**-10]
+bounds = [dimensions.E.min(), dimensions.E.max(), dimensions.q_perp.min() *10**-10, dimensions.q_perp.max() *10**-10]
 
 fig, ax= plt.subplots(2,2)
 
@@ -84,8 +92,8 @@ fig.colorbar(im, ax=ax, label=r'$\frac{dP^3}{dz dE dq_y} \left[ eV\ nm^{-1} \rig
 ax.set_title('log10 Total')
 ax.set_ylabel(r'$q_y [A^-]$')
 ax.set_xlabel(r'$E [eV]$')
-plt.plot(np.linspace(1,20,200),np.linspace(1,20,200)/c *10**-10,color='b')
-#plt.plot(np.linspace(1,20,200),np.linspace(-1*q_bound, q_bound,200)*10**-10,color='b')
+
+
 
 ######################################
 ######################################

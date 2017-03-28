@@ -18,15 +18,18 @@ eps0=8.85E-12#[C^2/N m]
 
 class microscope():
     def __init__(self,keV=100, resolution=0.05, collection_angle=2E-3):
-        self.keV=keV
+        self.keV = keV #self.keV={'value':keV, 'units':'keV'}
         
         self.gamma = 1 + keV/m0c2 #[au]
         
-        self.v=c * np.sqrt(self.keV * (keV + 2 * m0c2)/(keV + m0c2)**2) #[m/s]
-        self.T = m0c2/2 * (self.v/c)**2 #[keV]
+        v2_c2 = self.keV * (keV + 2 * m0c2)/(keV + m0c2)**2
+        self.v = c * np.sqrt(v2_c2) #[m/s]
+        self.T = m0*self.v**2/(2*e)#m0c2/2 * (self.v/c)**2 #[keV]
         self.resolution = resolution #Nion=0.05, Titan=0.05
         self.collection_angle = collection_angle #[mrad]
         
         self.k0 = m0*self.v*self.gamma/(hbar*e) #[1/m]
     def print_parameters(self):
-        print('q_beta: %.2f [1/nm]'%(self.k0*self.collection_angle/10**9))
+        for each in self.__dict__:
+            print(each,': ',self.__dict__[each])
+        print()

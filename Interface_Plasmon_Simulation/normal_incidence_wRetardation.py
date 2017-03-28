@@ -42,7 +42,9 @@ class double_differential_cross_section_normalIncidence():
         
         ###Angular terms
         self.theta2 = (spectrum.q_perp/microscope.k0)**2
-        self.thetaE2 = (spectrum.E/(hbar*microscope.v*microscope.k0))**2
+        self.thetaE2 = (spectrum.E/(hbar*microscope.v*microscope.k0))**2#spectrum.E/(2*microscope.gamma*microscope.T)#
+        print(spectrum.E/(2*microscope.gamma*microscope.T))
+        print((spectrum.E/(hbar*microscope.v*microscope.k0))**2)
         self.lambda2 = self.theta2 - self.eps[1] * self.thetaE2 * self.beta2
         self.lambda02 = self.theta2 - self.eps[0] * self.thetaE2 * self.beta2
         self.phi2 = self.lambda2 + self.thetaE2
@@ -55,7 +57,7 @@ class double_differential_cross_section_normalIncidence():
         self.Lm = np.sqrt(self.lambda02) * self.eps[1] + np.sqrt(self.lambda2) * self.eps[0] / self.tanh
         
         
-        self.A =e/(np.pi * a0 * m0 * microscope.v**2)  #e**3 / (4*np.pi**3 * hbar**2 * eps0 * microscope.v**2) #[m^2/eV]
+        self.A =e/(np.pi**2 * a0 * m0 * microscope.v**2)  #e**3 / (4*np.pi**3 * hbar**2 * eps0 * microscope.v**2) #[m^2/eV]
         self.B = -2 * self.theta2 * (self.eps[1] - self.eps[0])**2 / (microscope.k0 * (self.phi02 * self.phi2)**2)
         
     def bulk_mode(self):

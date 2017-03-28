@@ -64,9 +64,8 @@ class material():
             q = q#[:,None]
             #alpha = np.nan_to_num(3* self.E_fermi / (5*self.Ep_inf) * (1-(self.Ep_inf/(4*self.E_fermi))**2))
             alpha = np.nan_to_num(3* self.E_fermi / (5*self.Ep_inf))
-            self.Ep = self.Ep_inf + alpha* (hbar**2/m0c2) * q**2 #*e makes [eV]
-            print('kf',self.kFermi*10E-10)
-            print('ef',self.E_fermi)
+            self.Ep = self.Ep_inf + alpha* ((hbar)**2*e/m0) * q**2 #*e makes [eV]
+            print('A',(hbar)**2*e/m0)
             print('alpha',alpha)
     def set_eps(self, E=None):
         if E is not None:
