@@ -51,7 +51,7 @@ class material():
         self.n=self.valance*self.na*self.dz #e-/[m]^3
         self.omegaP=sp.sqrt(self.n*e**2/(eps0*m0)) #[1/s]
         self.energyP=sp.sqrt(self.n*e**2/(eps0*m0))*hbar #[eV]
-        self.Ep_inf = sp.sqrt(self.n*e**2/(eps0*m0))*hbar #[eV]
+        self.Ep_0 = sp.sqrt(self.n*e**2/(eps0*m0))*hbar #[eV]
         self.kFermi=(3*self.n*np.pi**2)**(1/3) #[1/m]
         self.E_fermi=hbar**2/(2*m0) * self.kFermi**2 *e #*e makes [eV]
         self.vFermi=hbar*self.kFermi/m0 *e #*e makes [m/s]
@@ -59,12 +59,12 @@ class material():
         self.set_eps()
     def set_Ep(self, q=None):
         if q is None:
-            self.Ep = self.Ep_inf
+            self.Ep = self.Ep_0
         else:
             q = q#[:,None]
-            #alpha = np.nan_to_num(3* self.E_fermi / (5*self.Ep_inf) * (1-(self.Ep_inf/(4*self.E_fermi))**2))
-            alpha = np.nan_to_num(3* self.E_fermi / (5*self.Ep_inf))
-            self.Ep = self.Ep_inf + alpha* ((hbar)**2*e/m0) * q**2 #*e makes [eV]
+            alpha = np.nan_to_num(3* self.E_fermi / (5*self.Ep_0) * (1-(self.Ep_0/(4*self.E_fermi))**2))
+            #alpha = np.nan_to_num(3* self.E_fermi / (5*self.Ep_0))
+            self.Ep = self.Ep_0 + alpha* ((hbar)**2*e/m0) * q**2 #*e makes [eV]
             print('A',(hbar)**2*e/m0)
             print('alpha',alpha)
     def set_eps(self, E=None):

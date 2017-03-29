@@ -29,22 +29,22 @@ class double_differential_cross_section_normalIncidence():
     def __init__(self,microscope,spectrum,materials, t):
         self.beta2 = (microscope.v/c)**2
         self.q_parallel = spectrum.E/(hbar*microscope.v)
+        
         ###set material parameters
         self.eps = []
         for i, material in enumerate(materials):
             material.set_Ep(q=np.sqrt(spectrum.q_perp**2 + self.q_parallel**2))
             material.set_eps(E=spectrum.E)
             self.eps.append(np.conjugate(material.eps))
-            print('Ep_0',material.Ep_inf)
+            print('Ep_0',material.Ep_0)
         self.t = t
         
         self.mu2 = 1 - self.eps[1] * self.beta2
         
         ###Angular terms
         self.theta2 = (spectrum.q_perp/microscope.k0)**2
-        self.thetaE2 = (spectrum.E/(hbar*microscope.v*microscope.k0))**2#spectrum.E/(2*microscope.gamma*microscope.T)#
-        print(spectrum.E/(2*microscope.gamma*microscope.T))
-        print((spectrum.E/(hbar*microscope.v*microscope.k0))**2)
+        self.thetaE2 = (spectrum.E/(2*microscope.gamma*microscope.T))**2 #(spectrum.E/(hbar*microscope.v*microscope.k0))**2
+
         self.lambda2 = self.theta2 - self.eps[1] * self.thetaE2 * self.beta2
         self.lambda02 = self.theta2 - self.eps[0] * self.thetaE2 * self.beta2
         self.phi2 = self.lambda2 + self.thetaE2

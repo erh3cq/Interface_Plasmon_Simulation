@@ -16,24 +16,30 @@ scope = microscope(keV=100)
 scope.print_parameters()
 
 class create_spectrum():
-    def __init__(self, q_perp_max=2E10, E_min=5, E_max=20):
+    def __init__(self, q_perp_max=1E10, E_min=5, E_max=20):
         self.q_perp = np.linspace(-1*q_perp_max, q_perp_max,800)[:,None]#microscope.k0*microscope.collection_angle
         self.E = np.linspace(E_min,E_max,400)
 
-dimensions = create_spectrum(q_perp_max=2E10, E_min=5, E_max=20)
+dimensions = create_spectrum(q_perp_max=6E10, E_min=5, E_max=20)
 print('theta_max: %.4f'%(dimensions.q_perp.max()/scope.k0))
 print('(111) @',2*np.pi/2.338,'[1/A]')
 print()
 
-#MR_Spectra = bulk_plasmon_double_differential_cross_section(microscope(),create_spectrum(),Al)
+
 MR_Spectra = double_differential_cross_section_normalIncidence(scope, dimensions, [vac,Al], 20*10E-9)
 
 import matplotlib.pyplot as plt
-def plot_limit_lines():
+def plot_boundary_markers(spectrum, material):
     c=3E8#[m/s]
     e=1.602E-19 #[C]
     m0=9.11E-31#[kg]
-    plt.plot(np.linspace(dimensions.E.min(), dimensions.E.max(),dimensions.E.size()), np.linspace(dimensions.E.min(), dimensions.E.max(),dimensions.E.size())/(m0*scope.v*c/e)*scope.k0 *10**-10, color='b')
+    hbar=6.582E-16#[eV s]
+    plt.plot(spectrum.E, spectrum.E/(m0*scope.v*c/e)*scope.k0 *10**-10, color='b')
+    print('k_fermi %.2E'%(material.kFermi*spectrum.q_perp.max()))
+    print('k_fermi %.2E'%(spectrum.q_perp.max()**2))
+    plt.plot(hbar**2*e/(2*m0)*(spectrum.q_perp**2 + 2*abs(spectrum.q_perp)*material.kFermi), spectrum.q_perp*10**-10, color='b')
+    plt.plot(hbar**2*e/(2*m0)*(spectrum.q_perp**2 - 2*abs(spectrum.q_perp)*material.kFermi), spectrum.q_perp*10**-10, color='b')
+    plt.xlim([spectrum.E.min(),spectrum.E.max()])
 
 
 fig, ax = plt.subplots()
@@ -92,14 +98,6 @@ fig.colorbar(im, ax=ax, label=r'$\frac{dP^3}{dz dE dq_y} \left[ eV\ nm^{-1} \rig
 ax.set_title('log10 Total')
 ax.set_ylabel(r'$q_y [A^-]$')
 ax.set_xlabel(r'$E [eV]$')
-
-
-
-######################################
-######################################
-############   plot Ep(q)  ###########
-######################################
-######################################
-# check that it goes up to ~20-30  ###
+#plot_boundary_markers(dimensions, Al)
 
 plt.show()
