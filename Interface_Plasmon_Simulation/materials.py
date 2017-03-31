@@ -84,7 +84,8 @@ def GB(da=0.1E-10,dE=0.8):
 
 vac=material(name="Vacuum", a1=1E-9, valance=0, dE=0)
 
-Al2O3=material(name='Al2O3', a1=0.4046E-9, dE=10, energyB=7.6)
+Al2O3=material(name='Al2O3', a1=0.4046E-9, dE=22, energyB=7.6)
+Al2O3.Ep_0 = 24
 
 MgO=material(name='MgO', a1=0.4046E-9, dE=6.7, energyB=7.8)
 
