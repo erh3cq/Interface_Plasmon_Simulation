@@ -40,25 +40,28 @@ class slab_system():
         self.interface_angle = interface_angle
         self.set_slab_positions()
         self.set_Ep_and_eps(energy ,q_perpendicular)
+        
     def set_slab_positions(self):
         for index, slab in enumerate(self.slabs):
             if index==0:
-                slab.position = -np.inf
+                slab.position = -np.inf - z * self.interface_angle
             elif index==1:
-                slab.position = 0
+                slab.position = 0 - z * self.interface_angle
             else:
                 slab.position = slabs[index-1].position + slabs[index-1].width
+
     def set_Ep_and_eps(self, energy ,q_perpendicular):
         for slab in self.slabs:
             slab.material.set_Ep(q=q_perpendicular)
             slab.material.set_eps(E=energy)
+            
     def print_details(self, slab='All'):
         def _info(index):
             print('_________________')
             print('Slab ',index,':')
-            print('position: %.2f [nm]   , width: %.2f [nm]'%(self.slabs[index].position/10**-9, self.slabs[index].width/10**-9))
+            print('position: %.2f [nm]   , width: %.2f [nm]'%(self.slabs[index].position[0]/10**-9, self.slabs[index].width/10**-9))
             print('Ep_0:   %.2f [eV]   , dE:    %.2f [eV]'%(self.slabs[index].material.Ep_0, self.slabs[index].material.dE))
-            print('q_min:    %.2f [1/nm] , q_c:   %.2f [1/nm]'%(self.slabs[index].q_min/10**9, self.slabs[index].q_c/10**9))    
+            print('q_min:    %.2f [1/nm] , q_c:   %.2f [1/nm]'%(self.slabs[index].q_min/10**9, self.slabs[index].q_c/10**9))      
         if slab == 'All':
             for index, slab in enumerate(self.slabs):
                 _info(index)
@@ -72,15 +75,18 @@ class linescan():
     q__perpendicular: [1/m]
     xb: [m]
     """
-    def __init__(self, z, energy, q_perpendicular, xb, slab_system, microscope):#introduce k_perp or theta
-        self.energy = energy
-        self.omega = energy / hbar
-        self.z = z[:,None,None,None]
-        self.xb = xb[:,None,None]
+    def __init__(self, thickness, dt=10, energy, q_perpendicular, xb, slab_system, microscope):#introduce k_perp or theta
         self.slab_system = slab_system
         self.microscope = microscope
+    
+        self.energy = energy
+        self.omega = energy / hbar
+        self.thickness = thickness
+        self.dt = dt
         self.q_parallel = self.omega / microscope.v
         self.q_perpendicular = np.where(q_perpendicular<=self.microscope.k0*self.microscope.collection_angle, q_perpendicular, 0)
+        
+        
         #self.q_perpendicular = q_perpendicular[:,None]#np.arange(k0 * theta)#Egerton pg131
         self.q = sqrt(self.q_parallel**2 + self.q_perpendicular**2)
         for index, slab in enumerate(self.slab_system):
@@ -96,9 +102,6 @@ class linescan():
         for index, slab in enumerate(self.slab_system):
             bulk, interface = self.slab_dP_dzdkydw(index)
             
-            for key, value in enumerate(self.slice_xb(index)):
-                if key != 0: bulk = np.concatenate((bulk,bulk[0][None,:]))
-
             if index == 0:
                 self.dP_dzdkydw_bulk = bulk
                 self.dP_dzdkydw_interface = interface
@@ -108,13 +111,6 @@ class linescan():
             del (bulk,interface)
             self.dP_dzdkydw = self.dP_dzdkydw_bulk + self.dP_dzdkydw_interface
 
-
-    def slice_xb(self,j):
-        slab_j = self.slab_system[j]
-        if j==0:
-            return self.xb[self.xb<0][:,None,None]
-        else:
-            return self.xb[np.logical_and(self.xb>=slab_j.position,self.xb<slab_j.position+slab_j.width)][:,None,None]
             
     def h(self,j,i,pm):
         slab_j = self.slab_system[j]
@@ -158,11 +154,10 @@ class linescan():
         return ar
     def g(self, j, pm):
         slab_j = self.slab_system[j]
-        xb = self.slice_xb(j)
         if j==0:
-            return np.exp(pm * slab_j.alpha * xb)
+            return np.exp(pm * slab_j.alpha * self.xb)
         else:
-            return np.exp(pm * slab_j.alpha * (xb - self.slab_system[j].position))
+            return np.exp(pm * slab_j.alpha * (self.xb - self.slab_system[j].position))
     def gamma(self, n, m, pm):
         return self.brackets(n,m)[0,0]*self.g(m,-1) + pm * self.brackets(n,m)[0,1]*self.g(m,1)
     def gammat(self, n, m, pm):
@@ -182,7 +177,7 @@ class linescan():
           - slab_m.alpha**2 * self.zeta(m-1,0,-1)*self.gamma(nSlabs,m,1)/self.brackets(nSlabs,0)[0,0]
           ) - 1/slab_m.alpha * (self.microscope.v**2/c**2 - 1/slab_m.material.eps)
         return chi_bulk, chi_interface
-    def slab_dP_dzdkydw(self, m):
+    def slab_dP_dzdkydw(self, m, z):
         chi_bulk, chi_interface = self.slab_chi(m)
         A = e/(4*np.pi**2*eps0*hbar**2*self.microscope.v**2)#initially e**2 but results are [1/J] so divide by e to get [1/eV]
         
@@ -194,8 +189,11 @@ class linescan():
         dP_dzdw_interface = integrate.simps(self.dP_dzdkydw_interface, self.q_perpendicular[None,:], axis=-2)
         return dP_dzdw_bulk+dP_dzdw_interface, dP_dzdw_bulk, dP_dzdw_interface
     def slab_dP_dkydw(self):
-        dP_dkydw_bulk = self.dP_dzdkydw_bulk*self.z.max()#slab_m.dP_dzdkydw_bulk, self.z, axis=-4)
-        dP_dkydw_interface = self.dP_dzdkydw_interface*self.z.max()#integrate.simps(slab_m.dP_dzdkydw_interface, self.z, axis=-4)
+        dP_dkydw_bulk = self.dP_dzdkydw_bulk * dt#slab_m.dP_dzdkydw_bulk, self.z, axis=-4)
+        dP_dkydw_interface = self.dP_dzdkydw_interface * dt#integrate.simps(slab_m.dP_dzdkydw_interface, self.z, axis=-4)
+        for z_pos in thickness:
+            dP_dkydw_bulk += self.dP_dzdkydw_bulk * dt
+            dP_dkydw_interface += self.dP_dzdkydw_interface * dt
         return dP_dkydw_bulk+dP_dkydw_interface, dP_dkydw_bulk, dP_dkydw_interface
 
 

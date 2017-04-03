@@ -13,6 +13,7 @@ import scipy.integrate as integrate
 import time
 start_time = time.clock()
 
+from microscope import microscope
 
 hbar=6.582E-16#[eV s]
 e=1.602E-19 #[C]
@@ -21,19 +22,6 @@ c=3E8#[m/s]
 m0=9.11E-31#[kg]
 m0c2=511.#[keV]
 eps0=8.85E-12#[C^2/N m]
-
-
-class microscope():
-    def __init__(self,keV=100, resolution=0.05, collection_angle=2E-3):
-        self.keV=keV
-        self.v=sqrt(keV*(keV+2*m0c2))/(keV+m0c2)*c #[m/s]
-        self.resolution = resolution #Nion=0.05, Titan=0.05
-        self.collection_angle = collection_angle #[mrad]
-        self.gamma = 1/sqrt(1-self.v**2/c**2) #[au]
-        self.T = 1/2*m0c2*(self.v/c)**2 #[keV]
-        self.k0 = m0*self.v*self.gamma/(hbar*e) #[1/m]
-    def print_parameters(self):
-        print('q_beta: %.2f [1/nm]'%(self.k0*self.collection_angle/10**9))
 
 
 class slab():
