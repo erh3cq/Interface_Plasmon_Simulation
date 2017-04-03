@@ -11,20 +11,21 @@ import matplotlib.colors as colors
 from scipy.integrate import quad
 from materials import Al, GB, vac, Al2O3
 from microscope import microscope
-from Bulk_plasmon import bulk_plasmon_double_differential_cross_section
+from Bulk_Plasmon import bulk_plasmon_double_differential_cross_section
 from normal_incidence_wRetardation import double_differential_cross_section_normalIncidence
 
 
 scope = microscope(keV=100)
 scope.print_parameters()
 
-class create_spectrum():
-    def __init__(self, q_perp_max=1E10, E_min=5, E_max=20):
-        self.q_perp = np.linspace(-1*q_perp_max, q_perp_max,800)[:,None]#microscope.k0*microscope.collection_angle
+class spectrum_dimmensions():
+    def __init__(self, q_perpendicular_max=1E10, E_min=5, E_max=20):
+        self.q_perpendicular = np.linspace(-1*q_perpendicular_max, q_perpendicular_max,800)[:,None]#microscope.k0*microscope.collection_angle
         self.E = np.linspace(E_min,E_max,400)
 
-dimensions = create_spectrum(q_perp_max=6E10, E_min=5, E_max=25)
-print('theta_max: %.4f'%(dimensions.q_perp.max()/scope.k0))
+dimensions = spectrum_dimmensions(q_perpendicular_max=6E10, E_min=5, E_max=20)
+print('theta_max: %.4f'%(dimensions.q_perpendicular.max()/scope.k0))
+
 print('(111) @',2*np.pi/2.338,'[1/A]')
 print()
 
@@ -38,10 +39,10 @@ def plot_boundary_markers(spectrum, material):
     m0=9.11E-31#[kg]
     hbar=6.582E-16#[eV s]
     plt.plot(spectrum.E, spectrum.E/(m0*scope.v*c/e)*scope.k0 *10**-10, color='b')
-    print('k_fermi %.2E'%(material.kFermi*spectrum.q_perp.max()))
-    print('k_fermi %.2E'%(spectrum.q_perp.max()**2))
-    plt.plot(hbar**2*e/(2*m0)*(spectrum.q_perp**2 + 2*abs(spectrum.q_perp)*material.kFermi), spectrum.q_perp*10**-10, color='b')
-    plt.plot(hbar**2*e/(2*m0)*(spectrum.q_perp**2 - 2*abs(spectrum.q_perp)*material.kFermi), spectrum.q_perp*10**-10, color='b')
+    print('k_fermi %.2E'%(material.kFermi*spectrum.q_perpendicular.max()))
+    print('k_fermi %.2E'%(spectrum.q_perpendicular.max()**2))
+    plt.plot(hbar**2*e/(2*m0)*(spectrum.q_perpendicular**2 + 2*abs(spectrum.q_perpendicular)*material.kFermi), spectrum.q_perpendicular*10**-10, color='b')
+    plt.plot(hbar**2*e/(2*m0)*(spectrum.q_perpendicular**2 - 2*abs(spectrum.q_perpendicular)*material.kFermi), spectrum.q_perpendicular*10**-10, color='b')
     plt.xlim([spectrum.E.min(),spectrum.E.max()])
 
 
@@ -54,7 +55,7 @@ plt.plot(MR_Spectra.eps[1][200].conj().imag, label=r'$\epsilon_i q=200$')
 plt.legend()
 
 
-bounds = [dimensions.E.min(), dimensions.E.max(), dimensions.q_perp.min() *10**-10, dimensions.q_perp.max() *10**-10]
+bounds = [dimensions.E.min(), dimensions.E.max(), dimensions.q_perpendicular.min() *10**-10, dimensions.q_perpendicular.max() *10**-10]
 
 fig, ax= plt.subplots(2,2)
 

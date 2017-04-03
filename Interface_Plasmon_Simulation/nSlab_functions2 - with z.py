@@ -13,6 +13,7 @@ import scipy.integrate as integrate
 import time
 start_time = time.clock()
 
+from microscope import microscope
 
 hbar=6.582E-16#[eV s]
 e=1.602E-19 #[C]
@@ -23,24 +24,11 @@ m0c2=511.#[keV]
 eps0=8.85E-12#[C^2/N m]
 
 
-class microscope():
-    def __init__(self,keV=100, resolution=0.05, collection_angle=2E-3):
-        self.keV=keV
-        self.v=sqrt(keV*(keV+2*m0c2))/(keV+m0c2)*c #[m/s]
-        self.resolution = resolution #Nion=0.05, Titan=0.05
-        self.collection_angle = collection_angle #[mrad]
-        self.gamma = 1/sqrt(1-self.v**2/c**2) #[au]
-        self.T = 1/2*m0c2*(self.v/c)**2 #[keV]
-        self.k0 = m0*self.v*self.gamma/(hbar*e) #[1/m]
-    def print_parameters(self):
-        print('q_beta: %.2f [1/nm]'%(self.k0*self.collection_angle/10**9))
-
-
 class slab():
     def __init__(self, material, width):
         self.material = material
         self.width = width
-        self.q_c = material.Ep_inf / (hbar*material.vFermi)#~1E10
+        self.q_c = material.Ep_0 / (hbar*material.vFermi)#~1E10
         if width is not np.inf:
             self.q_min = 2*np.pi / width
         else:
@@ -70,7 +58,7 @@ class slab_system():
             print('_________________')
             print('Slab ',index,':')
             print('position: %.2f [nm]   , width: %.2f [nm]'%(self.slabs[index].position[0]/10**-9, self.slabs[index].width/10**-9))
-            print('Ep_inf:   %.2f [eV]   , dE:    %.2f [eV]'%(self.slabs[index].material.Ep_inf, self.slabs[index].material.dE))
+            print('Ep_0:   %.2f [eV]   , dE:    %.2f [eV]'%(self.slabs[index].material.Ep_0, self.slabs[index].material.dE))
             print('q_min:    %.2f [1/nm] , q_c:   %.2f [1/nm]'%(self.slabs[index].q_min/10**9, self.slabs[index].q_c/10**9))    
         if slab == 'All':
             for index, slab in enumerate(self.slabs):
@@ -93,7 +81,7 @@ class linescan():
         self.slab_system = slab_system
         self.microscope = microscope
         self.q_parallel = self.omega / microscope.v
-        self.q_perpendicular = np.where(q_perpendicular<=self.microscope.k0*self.microscope.collection_angle, q_perpendicular, 0)[:,None]
+        self.q_perpendicular = np.where(q_perpendicular<=self.microscope.k0*self.microscope.collection_angle, q_perpendicular, 0)
         #self.q_perpendicular = q_perpendicular[:,None]#np.arange(k0 * theta)#Egerton pg131
         self.q = sqrt(self.q_parallel**2 + self.q_perpendicular**2)
         for index, slab in enumerate(self.slab_system):
