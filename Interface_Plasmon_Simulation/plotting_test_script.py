@@ -8,7 +8,7 @@ Created on Thu Mar 23 18:01:15 2017
 import numpy as np
 from materials import Al, GB, vac
 from microscope import microscope
-from Bulk_plasmon import bulk_plasmon_double_differential_cross_section
+from Bulk_Plasmon import bulk_plasmon_double_differential_cross_section
 from normal_incidence_wRetardation import double_differential_cross_section_normalIncidence
 
 

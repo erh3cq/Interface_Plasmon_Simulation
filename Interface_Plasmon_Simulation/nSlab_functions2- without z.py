@@ -39,7 +39,7 @@ class slab():
     def __init__(self, material, width):
         self.material = material
         self.width = width
-        self.q_c = material.Ep_inf / (hbar*material.vFermi)#~1E10
+        self.q_c = material.Ep_0 / (hbar*material.vFermi)#~1E10
         if width is not np.inf:
             self.q_min = 2*np.pi / width
         else:
@@ -69,7 +69,7 @@ class slab_system():
             print('_________________')
             print('Slab ',index,':')
             print('position: %.2f [nm]   , width: %.2f [nm]'%(self.slabs[index].position/10**-9, self.slabs[index].width/10**-9))
-            print('Ep_inf:   %.2f [eV]   , dE:    %.2f [eV]'%(self.slabs[index].material.Ep_inf, self.slabs[index].material.dE))
+            print('Ep_0:   %.2f [eV]   , dE:    %.2f [eV]'%(self.slabs[index].material.Ep_0, self.slabs[index].material.dE))
             print('q_min:    %.2f [1/nm] , q_c:   %.2f [1/nm]'%(self.slabs[index].q_min/10**9, self.slabs[index].q_c/10**9))    
         if slab == 'All':
             for index, slab in enumerate(self.slabs):
@@ -92,7 +92,7 @@ class linescan():
         self.slab_system = slab_system
         self.microscope = microscope
         self.q_parallel = self.omega / microscope.v
-        self.q_perpendicular = np.where(q_perpendicular<=self.microscope.k0*self.microscope.collection_angle, q_perpendicular, 0)[:,None]
+        self.q_perpendicular = np.where(q_perpendicular<=self.microscope.k0*self.microscope.collection_angle, q_perpendicular, 0)
         #self.q_perpendicular = q_perpendicular[:,None]#np.arange(k0 * theta)#Egerton pg131
         self.q = sqrt(self.q_parallel**2 + self.q_perpendicular**2)
         for index, slab in enumerate(self.slab_system):
@@ -106,13 +106,10 @@ class linescan():
                 slab.q_perpendicular=np.where(slab.q_perpendicular < slab.q_c, slab.q_perpendicular, 0)
 
         for index, slab in enumerate(self.slab_system):
-            print('slab:',index)
             bulk, interface = self.slab_dP_dzdkydw(index)
-            print(bulk.shape)
             
             for key, value in enumerate(self.slice_xb(index)):
                 if key != 0: bulk = np.concatenate((bulk,bulk[0][None,:]))
-                print('b shape:',bulk.shape)
 
             if index == 0:
                 self.dP_dzdkydw_bulk = bulk
@@ -222,7 +219,7 @@ z = np.linspace(0, thickness, num=50)
 
 minE, maxE=5, 25
 energy = np.arange(minE, maxE, microscope.resolution)
-q_perpendicular = np.linspace(0,microscope.k0*microscope.collection_angle,200)#np.arange(0,1E10,1E5)
+q_perpendicular = np.linspace(0,microscope.k0*microscope.collection_angle,200)[:,None]#np.arange(0,1E10,1E5)
 
 
 from materials import Al, GB, vac
