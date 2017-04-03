@@ -53,8 +53,8 @@ class double_differential_cross_section_normalIncidence():
         
         self.de = self.t * spectrum.E / (2*hbar * microscope.v)
         self.tanh = np.tanh(np.sqrt(self.lambda2/self.thetaE2) * self.de)
-        self.Lp = np.sqrt(self.lambda02) * self.eps[1] + np.sqrt(self.lambda2) * self.eps[0] * self.tanh
-        self.Lm = np.sqrt(self.lambda02) * self.eps[1] + np.sqrt(self.lambda2) * self.eps[0] / self.tanh
+        self.Lp = np.sqrt(self.lambda02) * self.eps[1] + np.sqrt(self.lambda2) * self.eps[0] * self.tanh #symetric mode
+        self.Lm = np.sqrt(self.lambda02) * self.eps[1] + np.sqrt(self.lambda2) * self.eps[0] / self.tanh #anti-symetric mode
         
         
         self.A =e/(np.pi**2 * a0 * m0 * microscope.v**2)  #e**3 / (4*np.pi**3 * hbar**2 * eps0 * microscope.v**2) #[m^2/eV]
