@@ -49,7 +49,7 @@ class double_differential_cross_section_normalIncidence():
         self.lambda02 = self.theta2 - self.eps[0] * self.thetaE2 * self.beta2
         self.phi2 = self.lambda2 + self.thetaE2
         self.phi02 = self.lambda02 + self.thetaE2
-        self.phi2_01 = self.theta2 + self.thetaE2 * (1 - (self.eps[1] - self.eps[0]) * self.beta2)
+        self.phi2_01 = self.theta2 + self.thetaE2 * (1 - (self.eps[1] + self.eps[0]) * self.beta2)
         
         self.de = self.t * spectrum.E / (2*hbar * microscope.v)
         self.tanh = np.tanh(np.sqrt(self.lambda2/self.thetaE2) * self.de)
