@@ -11,7 +11,7 @@ import matplotlib.colors as colors
 from scipy.integrate import quad
 from materials import Al, GB, vac, Al2O3
 from microscope import microscope
-from Bulk_plasmon import bulk_plasmon_double_differential_cross_section
+from Bulk_Plasmon import bulk_plasmon_double_differential_cross_section
 from normal_incidence_wRetardation import double_differential_cross_section_normalIncidence
 
 
@@ -30,7 +30,7 @@ print('(111) @',2*np.pi/2.338,'[1/A]')
 print()
 
 
-MR_Spectra = double_differential_cross_section_normalIncidence(scope, dimensions, [vac, Al], 20*10E-9)
+MR_Spectra = double_differential_cross_section_normalIncidence(scope, dimensions, [vac, Al], 100*10E-9)
 
 
 def plot_boundary_markers(spectrum, material):
