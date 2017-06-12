@@ -52,6 +52,7 @@ class material():
         self.omegaP=sp.sqrt(self.n*e**2/(eps0*m0)) #[1/s]
         self.energyP=sp.sqrt(self.n*e**2/(eps0*m0))*hbar #[eV]
         self.Ep_0 = sp.sqrt(self.n*e**2/(eps0*m0))*hbar #[eV]
+        self.alpha = 0.0
         self.kFermi=(3*self.n*np.pi**2)**(1/3) #[1/m]
         self.E_fermi=hbar**2/(2*m0) * self.kFermi**2 *e #*e makes [eV]
         self.vFermi=hbar*self.kFermi/m0 *e #*e makes [m/s]
@@ -61,12 +62,11 @@ class material():
         if q is None:
             self.Ep = self.Ep_0
         else:
-            q = q#[:,None]
-            alpha = np.nan_to_num(3* self.E_fermi / (5*self.Ep_0) * (1-(self.Ep_0/(4*self.E_fermi))**2))
-            #alpha = np.nan_to_num(3* self.E_fermi / (5*self.Ep_0))
-            self.Ep = self.Ep_0 + alpha* ((hbar)**2*e/m0) * q**2 #*e makes [eV]
-            print('A',(hbar)**2*e/m0)
-            print('alpha',alpha)
+            #q = q[:,None]
+            if self.n != 0:
+                self.alpha = np.nan_to_num(3* self.E_fermi / (5*self.Ep_0) * (1-(self.Ep_0/(4*self.E_fermi))**2))
+                #alpha = np.nan_to_num(3* self.E_fermi / (5*self.Ep_0))
+            self.Ep = self.Ep_0 + self.alpha* ((hbar)**2*e/m0) * q**2 #*e makes [eV]
     def set_eps(self, E=None):
         if E is not None:
             self.eps = 1 - self.Ep**2/(E**2-(self.energyB)**2+1j*E*self.damp*hbar)#unitless
