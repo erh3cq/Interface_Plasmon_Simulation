@@ -36,7 +36,10 @@ class double_differential_cross_section_normalIncidence():
             material.set_Ep(q=np.sqrt(spectrum.q_perpendicular**2 + self.q_parallel**2))
             material.set_eps(E=spectrum.E)
             self.eps.append(np.conjugate(material.eps))
-            print('Ep_0',material.Ep_0)
+            print(material.name)
+            print('Ep_0',material.Ep_0,'[eV]')
+            print('E_fermi',material.E_fermi,'[eV]')
+            print()
         self.t = t
         
         self.mu2 = 1 - self.eps[1] * self.beta2
@@ -53,7 +56,7 @@ class double_differential_cross_section_normalIncidence():
         
         self.de = self.t * spectrum.E / (2*hbar * microscope.v)
         self.tanh = np.tanh(np.sqrt(self.lambda2/self.thetaE2) * self.de)
-        self.Lp = np.sqrt(self.lambda02) * self.eps[1] + np.sqrt(self.lambda2) * self.eps[0] * self.tanh #symetric mode
+        self.Lp = np.sqrt(self.lambda02) * self.eps[1] + np.sqrt(self.lambda2) * self.eps[0] * self.tanh #symetric mode     
         self.Lm = np.sqrt(self.lambda02) * self.eps[1] + np.sqrt(self.lambda2) * self.eps[0] / self.tanh #anti-symetric mode
         
         

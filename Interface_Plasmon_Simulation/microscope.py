@@ -30,6 +30,7 @@ class microscope():
         
         self.k0 = m0*self.v*self.gamma/(hbar*e) #[1/m]
     def print_parameters(self):
+        print('Microscope')
         for each in self.__dict__:
             print(each,': ',self.__dict__[each])
         print()
