@@ -6,6 +6,8 @@ Created on Thu Mar 23 17:52:20 2017
 """
 
 from __future__ import division, print_function
+from traits.api import HasTraits, Float, List, Instance
+from traitsui.api import *
 import numpy as np
 
 hbar=6.582E-16#[eV s]
@@ -16,8 +18,11 @@ m0=9.11E-31#[kg]
 m0c2=511.#[keV]
 eps0=8.85E-12#[C^2/N m]
 
-class microscope():
-    def __init__(self,keV=100, resolution=0.05, collection_angle=2E-3):
+class microscope(HasTraits):
+    #__parent = Instance(system)
+    def __init__(self, parent, keV=100, resolution=0.05, collection_angle=2E-3):
+        self.__parent = parent
+        
         self.keV = keV #self.keV={'value':keV, 'units':'keV'}
         
         self.gamma = 1 + keV/m0c2 #[au]
