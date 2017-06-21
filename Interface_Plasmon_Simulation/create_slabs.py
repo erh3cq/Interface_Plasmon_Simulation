@@ -31,24 +31,24 @@ class spectrum_dimmensions(HasTraits):
     def _q_perpendicular_changed(self):
         self.E_max = self.E_min
         #self.q_perpendicular = np.linspace(Float(-1.0)*self.q_perpendicular_max, self.q_perpendicular_max,800)[:,None]
-        print('q_perpendicular updated')
+#        print('q_perpendicular updated')
         
     @property
     def q_parallel(self):
-        print('getting q_parallel')
+#        print('getting q_parallel')
         return self.__q_parallel
     @q_parallel.setter
     def q_parallel(self,value):
         if value is None:
             if self.__parent.microscope:
-                print(self.__parent.microscope.v)
-                print('Set q_parallel to ',self.E/(hbar * self.__parent.microscope.v),' based on microscope parameters')
+#                print(self.__parent.microscope.v)
+#                print('Set q_parallel to ',self.E/(hbar * self.__parent.microscope.v),' based on microscope parameters')
                 self.__q_parallel = self.E/(hbar * self.__parent.microscope.v)
             else:
-                print('Microscope parameters have not been set.  Therefore, q_parallel = None')
+#                print('Microscope parameters have not been set.  Therefore, q_parallel = None')
                 self.__q_parallel = None
         else:
-            print('Set q_parallel to specified value of ',value)
+#            print('Set q_parallel to specified value of ',value)
             self.__q_parallel = value
         
 class create_sample():
