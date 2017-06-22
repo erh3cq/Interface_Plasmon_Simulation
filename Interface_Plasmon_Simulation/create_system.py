@@ -30,7 +30,7 @@ class system(HasTraits):
     def add_microscope(self):
         self.microscope = microscope()
         microscope.parent_system = self
-        microscope.add_class_trait('parent_system',self)
+#        microscope.add_class_trait('parent_system',self)
         
     def add_tag(self):
         return
