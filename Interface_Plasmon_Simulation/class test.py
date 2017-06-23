@@ -5,10 +5,10 @@ Created on Mon Jun 12 11:38:34 2017
 @author: mse334
 """
 
-from traits.api import HasTraits, Float, List, Str, Instance, on_trait_change
+from traits.api import HasTraits, Float, List, Str, Instance, on_trait_change, Property
 from traitsui.api import *
 
-class microscope(HasTraits):
+class Microscope(HasTraits):
     parent_sys = None
     parent_sysN = Float(0)
     out = Float(0)
@@ -35,24 +35,47 @@ class microscope(HasTraits):
         self.name = Str('Titan')
         
 
-class dimensions(HasTraits):
+class Dimensions(HasTraits):
     def __init__(self):
         self.number = 'two'
 
-class system(HasTraits):
+class System(HasTraits):
     name = Str('Main system')
-    microscope = Instance(microscope, desc='Microscope parameters', label='Microscope')
-    dimmension = Instance(dimensions, desc='Energy and momentum dimensions', label='Dimmensions')
+    microscope = Instance(Microscope, desc='Microscope parameters', label='Microscope')
+    dimmension = Instance(Dimensions, desc='Energy and momentum dimensions', label='Dimmensions')
     def __init__(self):
         self.initialized = 'Yes'
         self.add_microscope()
-        self.axis = dimensions()
+        self.axis = Dimensions()
         
     def add_microscope(self):
-        self.microscope = microscope()
+        self.microscope = Microscope()
 #        self.microscope.parent_sys = self
-        microscope.add_class_trait('parent_sys',self)
+        print(self.microscope.parent_sys)
+        Microscope.add_class_trait('parent_sys',self)
+        print(self.microscope.parent_sys)
 
             
-tester = system()
-tester.configure_traits()
+tester = System()
+#tester.configure_traits()
+
+print('\n')
+
+class EchoBox(HasTraits):
+    pre_inp = Float
+    inp = None
+    output = Float(0)
+    def _inp_changed(self):
+        self.output = self.inp
+        print('changed')
+    def add_inp(self):
+        EchoBox.add_class_trait('inp',Float(1., depends_on='pre_inp'))
+        
+box = EchoBox()
+print(box.inp)
+box.add_inp()
+print(box.inp)
+box.inp = 2
+print(box.inp)
+#box.configure_traits()
+    
