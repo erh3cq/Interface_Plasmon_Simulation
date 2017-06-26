@@ -5,27 +5,40 @@ Created on Mon Jun 12 11:38:34 2017
 @author: mse334
 """
 
-from traits.api import HasTraits, HasPrivateTraits, Float, List, Str, Instance, on_trait_change, Any, Generic
+from traits.api import HasTraits, HasPrivateTraits, Float, Enum, Str, Instance, on_trait_change, Any, Generic,Undefined, Trait
 from traitsui.api import *
 
 class Microscope(HasTraits):
-    parent_sys = Generic
-    parent_sysN = Float(0)
+#    parent_system = Instance(Undefined)#Generic
+    _parent_system = None
+    inp = Float(0)
     out = Float(0)
         
-    @on_trait_change('parent_sys')
-    def _parent_sys_changed(self):
-        self.__parent_sys = self
-        print('parent system set to: ', self.parent_sys.name)
-        self.out = self.parent_sysN
+#    @on_trait_change('parent_system')
+#    def _parent_sys_changed(self):
+#        self.__parent_sys = self
+#        print('parent system set to: ', self.parent_system.name)
+
+    @on_trait_change('inp')
+    def _parent_sysN_changed(self):
+        print('Input(scope) changed to: ', self.inp)
+        self.out = self.inp
         
 #   WORKS
 #    def _parent_sysN_changed(self):
-#        print('parent system set to: ', self.parent_sys.name)
-#        self.out = self.parent_sysN    
+#        print('parent system set to: ', self.parent_system.name)
+#        self.out = self.inp    
 
-    def __init__(self):
-        self.name = Str('Titan')
+    def __init__(self, **traits):
+        HasTraits.__init__(self, **traits)
+        self.add_trait('name',Enum('Titan','Themis','Nion'))
+
+    trait_view = View(Item(name = 'name'),
+#                      Item(name = 'parent_system'),
+                      Group(Item(name = 'inp'),
+                            Item(name = 'out'),
+                            label = '%s parameters'%inp,
+                            show_border = True))
         
 
 class Dimensions(HasTraits):
@@ -33,24 +46,51 @@ class Dimensions(HasTraits):
         self.number = 'two'
 
 class System(HasTraits):
-    name = Str('Main system')
-    microscope = Instance(Microscope, desc='Microscope parameters', label='Microscope')
+    name = Str('Main System')
+    scope = Instance(Microscope, (), desc='Microscope parameters', label='Microscope')
     dimmension = Instance(Dimensions, desc='Energy and momentum dimensions', label='Dimmensions')
-    def __init__(self):
+    
+    inp = Float(0, label='Input')
+    output = Float(0)
+    @on_trait_change('inp')
+    def _inp_changed(self):
+        self.output = self.inp
+        print('Input (system) changed to',self.inp)
+    
+    def __init__(self, **traits):
+        HasTraits.__init__(self, **traits)
         self.initialized = 'Yes'
         self.add_microscope()
         self.axis = Dimensions()
         
+    trait_view = View(
+            Item('name', style='readonly'),
+            Group(
+                    Item(name = 'scope', style = 'custom', show_label = False, dock = 'tab'),
+                    Group(
+                            Item(name = 'inp'),
+                            Item(name = 'output'),
+                            label = 'System parameters',
+                            dock = 'tab'),
+                    show_border = True,
+                    layout = 'tabbed'),
+        title = '',
+        resizable = True)
+        
+        
     def add_microscope(self):
-        self.microscope = Microscope()
-#        self.microscope.parent_sys = self
-        print(self.microscope.parent_sys)
-#        Microscope.add_class_trait('parent_sys',self)
-        print(self.microscope.parent_sys)
-
-            
+#        self.scope = Microscope()
+#        self.scope.parent_system.klass = self
+#        self.scope.parent_system = self
+        Microscope.add_class_trait('parent_system',Instance(self))
+        self.scope.parent_system = self
+        self.scope._parent_system = self
+        print('Added scope with value of:',self.scope.parent_system)
+        
+           
 tester = System()
-#tester.configure_traits()
+#print(tester.trait('parent_system').default_kind) 
+tester.configure_traits()
 
 print('\n')
 
@@ -83,25 +123,25 @@ class EchoBox(HasPrivateTraits):
 #        EchoBox.add_class_trait('_inp',Float(1., depends_on='pre_inp'))
         
 box = EchoBox()
-print(box._inp)
-print('Is float: ',box.trait('_inp').is_trait_type( Float ) )
-print('Is any: ',box.trait('_inp').is_trait_type( Any ) )
-print()
-
-box.add_inp()
-print('3',box._inp)
-box.trait('_inp').Trait_type=Float
-print(box.trait('_inp').Trait_type )
-print('4',box._inp)
-print('Is float: ',box.trait('_inp').is_trait_type( Float ) )
-print('Is any: ',box.trait('_inp').is_trait_type( Any ) )
-print()
-
-
-box.add_inp()
-#box._inp = 2
-print('3',box._inp)
-print('Is float: ',box.trait('_inp').is_trait_type( Float ) )
-print('Is any: ',box.trait('_inp').is_trait_type( Any ) )
-box.configure_traits()
+#print(box._inp)
+#print('Is float: ',box.trait('_inp').is_trait_type( Float ) )
+#print('Is any: ',box.trait('_inp').is_trait_type( Any ) )
+#print()
+#
+#box.add_inp()
+#print('3',box._inp)
+#box.trait('_inp').Trait_type=Float
+#print(box.trait('_inp').Trait_type )
+#print('4',box._inp)
+#print('Is float: ',box.trait('_inp').is_trait_type( Float ) )
+#print('Is any: ',box.trait('_inp').is_trait_type( Any ) )
+#print()
+#
+#
+#box.add_inp()
+##box._inp = 2
+#print('3',box._inp)
+#print('Is float: ',box.trait('_inp').is_trait_type( Float ) )
+#print('Is any: ',box.trait('_inp').is_trait_type( Any ) )
+#box.configure_traits()
     
