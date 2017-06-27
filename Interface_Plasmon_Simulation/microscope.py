@@ -6,7 +6,7 @@ Created on Thu Mar 23 17:52:20 2017
 """
 
 from __future__ import division, print_function
-from traits.api import HasTraits, Float, List, Instance, on_trait_change
+from traits.api import HasTraits, Float, Int, Str, Instance, on_trait_change
 from traitsui.api import *
 import numpy as np
 
@@ -18,30 +18,59 @@ m0=9.11E-31#[kg]
 m0c2=511.#[keV]
 eps0=8.85E-12#[C^2/N m]
 
-class microscope(HasTraits):
-    #__parent = Instance(system)
-    def __init__(self, keV=100, resolution=0.05, collection_angle=2E-3):
-        parent_system = None
-        self.keV = keV #self.keV={'value':keV, 'units':'keV'}
-        
-        self.gamma = 1 + keV/m0c2 #[au]
-        
-        v2_c2 = self.keV * (keV + 2 * m0c2)/(keV + m0c2)**2
-        self.v = c * np.sqrt(v2_c2) #[m/s]
-        self.T = m0*self.v**2/(2*e)#m0c2/2 * (self.v/c)**2 #[keV]
+class Microscope(HasTraits):
+    _parent_system = None
+    name = Str('User specified', desc='Name of the microscope', label='Name')
+    keV = Int(100, desc='Accelerating voltage', label='keV')
+    gamma = Float(desc='', label='gamma')
+    v2_c2 = Float(desc='Speed as a fraction of the speed of light', label='v2/c2')
+    v = Float(desc='Velocity', label='v [m/s]')
+    T = Float(desc='Kinetic energy', label='T [keV]')
+    k0 = Float(desc='Wave number', label='k0 [1/m]')
+    
+    resolution = Float(0.05, desc='Energy resolution of the microscope (ie FWHM of the ZLP)', label='Resolution [eV]')
+    dispersion = Float(0.05, desc='Energy dispersion of the spectrometer', label='Dispersion [eV]')
+    collection_angle = Float(2E-3, desc='Spectrometr collection semi-angle', label='Collection semi-angle [mrad]')
+    
+    trait_view = View(
+            Item('name'),
+            'keV',
+            Item('gamma', style='readonly'),
+            Item('v2_c2', style='readonly'),
+            Item('v', style='readonly'),
+            Item('T', style='readonly'),
+            Item('k0', style='readonly'),
+            Group(
+                    'resolution',
+                    'dispersion',
+                    'collection_angle',
+                    show_border = True,
+                    label='EELS'),
+            title = 'Microscope',
+            resizable = True)
+    
+    def __init__(self, resolution=0.05, collection_angle=2E-3, **traits):
+        HasTraits.__init__(self, **traits)
+        self.gamma = 1 + self.keV/m0c2 #[au]        
+        self.v2_c2 = self.keV * (self.keV + 2 * m0c2)/(self.keV + m0c2)**2 #[au]
+        self.v = c * np.sqrt(self.v2_c2) #[m/s]
+        self.T = m0*self.v**2/(2*e) #m0c2/2 * (self.v/c)**2 #[keV]
         self.resolution = resolution #Nion=0.05, Titan=0.05
-        self.collection_angle = collection_angle #[mrad]
         
         self.k0 = m0*self.v*self.gamma/(hbar*e) #[1/m]
         
-        @on_trait_change('parent_system')
-        def _parent_system_changed():
-            print('Parent sys',parent_system)
-            parent_system.test = 4.0
-            if parent_system is not None:
-                print('Printing parent_system test',parent_system.test)
+    ##############################
+    ##############################
+    # Add change catches for keV #
+    ##############################
+    ##############################
+
     def print_parameters(self):
         print('Microscope')
         for each in self.__dict__:
             print(each,': ',self.__dict__[each])
         print()
+
+if __name__ == '__main__':   
+    test_scope = Microscope(keV=100)
+    test_scope.configure_traits()

@@ -7,49 +7,6 @@ Created on Mon Apr  3 13:31:02 2017
 import numpy as np
 from traits.api import HasTraits, Float, List, Instance, on_trait_change
 from traitsui.api import *
-
-#Constants
-hbar=6.582E-16#[eV s]
-
-
-class spectrum_dimmensions(HasTraits):
-    E_min = Float(0.0)
-    E_max = Float(0.0)
-    q_perpendicular_max = Float(0.0)
-    def __init__(self, parent, q_perpendicular_max=1E10, E_min=5, E_max=20):
-        self.q_perpendicular_max = q_perpendicular_max
-        self.E_min = E_min
-        self.E_max = E_max
-        
-        self.__parent = parent
-        
-        self.E = np.linspace(E_min,E_max,400)
-        self.q_perpendicular = np.linspace(-1.0*self.q_perpendicular_max, self.q_perpendicular_max,800)[:,None]#microscope.k0*microscope.collection_angle
-        self.q_parallel = None
-    
-    @on_trait_change(['E_min','E_max'])
-    def _q_perpendicular_changed(self):
-        self.E_max = self.E_min
-        #self.q_perpendicular = np.linspace(Float(-1.0)*self.q_perpendicular_max, self.q_perpendicular_max,800)[:,None]
-#        print('q_perpendicular updated')
-        
-    @property
-    def q_parallel(self):
-#        print('getting q_parallel')
-        return self.__q_parallel
-    @q_parallel.setter
-    def q_parallel(self,value):
-        if value is None:
-            if self.__parent.microscope:
-#                print(self.__parent.microscope.v)
-#                print('Set q_parallel to ',self.E/(hbar * self.__parent.microscope.v),' based on microscope parameters')
-                self.__q_parallel = self.E/(hbar * self.__parent.microscope.v)
-            else:
-#                print('Microscope parameters have not been set.  Therefore, q_parallel = None')
-                self.__q_parallel = None
-        else:
-#            print('Set q_parallel to specified value of ',value)
-            self.__q_parallel = value
         
 class create_sample():
     def __init__(self, slabs, spectrum_dimmensions, interface_angle=0):

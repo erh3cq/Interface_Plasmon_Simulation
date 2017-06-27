@@ -96,19 +96,20 @@ print('\n')
 
 class EchoBox(HasPrivateTraits):
     pre_inp = Float(label='Pre-input')
-    _inp = Generic
-    output = Float(0)
-    trait_view = View(Group(Item(name = 'pre_inp'),
+    _inp1 = Float(1)
+    _inp2 = Float(2)
+    output = Float()
+    trait_view = View(Group(Item(name = '_inp1'),
+                            Item(name = '_inp2'),
                              Item(name = 'output'),
                              label = 'Section',
                              show_border = True))
 #    def _inp_changed(self):
 #        self.output = self._inp
 #        print('changed')
-    @on_trait_change(['_inp','pre_inp'])
+    @on_trait_change(['_inp1','_inp2'])
     def _inp_changed(self):
-        self.output = self.pre_inp
-        print('changed to',self.pre_inp)
+        self.output = self._inp1+self._inp2
 
     def add_inp(self):
         if self._inp is not self.trait('_inp').is_trait_type( Float ):
@@ -123,25 +124,6 @@ class EchoBox(HasPrivateTraits):
 #        EchoBox.add_class_trait('_inp',Float(1., depends_on='pre_inp'))
         
 box = EchoBox()
-#print(box._inp)
-#print('Is float: ',box.trait('_inp').is_trait_type( Float ) )
-#print('Is any: ',box.trait('_inp').is_trait_type( Any ) )
-#print()
-#
-#box.add_inp()
-#print('3',box._inp)
-#box.trait('_inp').Trait_type=Float
-#print(box.trait('_inp').Trait_type )
-#print('4',box._inp)
-#print('Is float: ',box.trait('_inp').is_trait_type( Float ) )
-#print('Is any: ',box.trait('_inp').is_trait_type( Any ) )
-#print()
-#
-#
-#box.add_inp()
-##box._inp = 2
-#print('3',box._inp)
-#print('Is float: ',box.trait('_inp').is_trait_type( Float ) )
-#print('Is any: ',box.trait('_inp').is_trait_type( Any ) )
-#box.configure_traits()
+
+box.configure_traits()
     
