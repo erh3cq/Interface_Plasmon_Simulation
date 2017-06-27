@@ -35,11 +35,11 @@ class Microscope(HasTraits):
     trait_view = View(
             Item('name'),
             'keV',
-            Item('gamma', style='readonly'),
-            Item('v2_c2', style='readonly'),
-            Item('v', style='readonly'),
-            Item('T', style='readonly'),
-            Item('k0', style='readonly'),
+            Item('gamma', style='readonly', format_str='%.3f'),
+            Item('v2_c2', style='readonly', format_str='%.3f'),
+            Item('v', style='readonly', format_str='%.3E'),
+            Item('T', style='readonly', format_str='%.3E'),
+            Item('k0', style='readonly', format_str='%.3E'),
             Group(
                     'resolution',
                     'dispersion',
