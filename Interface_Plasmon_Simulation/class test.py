@@ -88,39 +88,29 @@ class System(HasTraits):
         print('Added scope with value of:',self.scope.parent_system)
         
            
-tester = System()
+#tester = System()
 #print(tester.trait('parent_system').default_kind) 
-tester.configure_traits()
+#tester.configure_traits()
 
 print('\n')
 
-class EchoBox(HasPrivateTraits):
+class EchoBox(HasTraits):
     pre_inp = Float(label='Pre-input')
-    _inp1 = Float(1)
-    _inp2 = Float(2)
-    output = Float()
-    trait_view = View(Group(Item(name = '_inp1'),
-                            Item(name = '_inp2'),
+    inp1 = Float(1)
+#    inp1 = 1.0
+    inp2 = Float(2)
+#    inp2 = 2
+    output = Generic(inp1+inp2)
+    trait_view = View(Group(Item(name = 'inp1'),
+                            Item(name = 'inp2'),
                              Item(name = 'output'),
                              label = 'Section',
                              show_border = True))
-#    def _inp_changed(self):
-#        self.output = self._inp
-#        print('changed')
-    @on_trait_change(['_inp1','_inp2'])
+    
+    @on_trait_change(['inp1','inp2'])
     def _inp_changed(self):
-        self.output = self._inp1+self._inp2
+        self.output = self.inp1+self.inp2
 
-    def add_inp(self):
-        if self._inp is not self.trait('_inp').is_trait_type( Float ):
-            print('not Float conditional')
-            print('1:',self.trait('_inp').trait_type)
-#            self._inp = Float(0.0)
-            self._inp = 0.0
-            print('2:',self.trait('_inp').trait_type)
-        else:
-            print('Float Conditional')
-            self._inp = self._inp+1
 #        EchoBox.add_class_trait('_inp',Float(1., depends_on='pre_inp'))
         
 box = EchoBox()
