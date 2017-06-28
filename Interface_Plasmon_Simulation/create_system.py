@@ -15,10 +15,10 @@ hbar=6.582E-16#[eV s]
 
 class System(HasTraits):
     name = Str('Main System')
+#    _tags = List([microscope, 'dimmension'], label='Tags')
 #    _tags2 = List([], label='Tags')
     microscope = Instance(Microscope, (), desc='Microscope parameters', label='Microscope')
     dimensions = Instance(Spectrum_dimensions, (), desc='Energy and momentum dimensions', label='Dimmensions')
-    #_tags = List([microscope, 'dimmension'], label='Tags')
     
     trait_view = View(
             Item('name', style='readonly'),
@@ -34,15 +34,10 @@ class System(HasTraits):
         HasTraits.__init__(self, **traits)
         self.add_microscope()
         self.dimensions._parent_system = self
-#        self.dimensions = Spectrum_dimensions()
-#        self.spectrum_dimensions.add_class_trait('parent_system',self)
         #self.add_trait('_tags2', [self.microscope, 'dimmension', 'test'])
-        #self.dimmension = Instance(spectrum_dimmensions(self), desc='Energy and momentum dimensions', label='Dimmensions')
 
     def add_microscope(self):
-#        self.microscope = microscope()
         self.microscope._parent_system = self
-#        microscope.add_class_trait('parent_system',self)
         
     def add_tag(self):
         return
