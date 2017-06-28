@@ -50,12 +50,15 @@ class Microscope(HasTraits):
             resizable = True)
     
     def __init__(self, resolution=0.05, collection_angle=2E-3, **traits):
-        HasTraits.__init__(self, **traits)
+        super().__init__()
+        self.set_derived_parameters()
+        
+    @on_trait_change('keV')
+    def set_derived_parameters(self):
         self.gamma = 1 + self.keV/m0c2 #[au]        
         self.v2_c2 = self.keV * (self.keV + 2 * m0c2)/(self.keV + m0c2)**2 #[au]
         self.v = c * np.sqrt(self.v2_c2) #[m/s]
         self.T = m0*self.v**2/(2*e) #m0c2/2 * (self.v/c)**2 #[keV]
-        self.resolution = resolution #Nion=0.05, Titan=0.05
         
         self.k0 = m0*self.v*self.gamma/(hbar*e) #[1/m]
         
