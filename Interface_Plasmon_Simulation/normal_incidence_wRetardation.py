@@ -27,7 +27,7 @@ eps0=8.85E-12#[C^2/N m]
 
 class double_differential_cross_section_normalIncidence():
     def __init__(self, microscope, spectrum, materials, t):
-        self.beta2 = (microscope.v/c)**2
+        self.beta2 = microscope.v2_c2
         self.q_parallel = spectrum.E/(hbar*microscope.v)
         
         ###set material parameters
