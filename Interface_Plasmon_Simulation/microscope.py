@@ -50,7 +50,8 @@ class Microscope(HasTraits):
             resizable = True)
     
     def __init__(self, resolution=0.05, collection_angle=2E-3, **traits):
-        super().__init__()
+        super().__init__(**traits)
+#        HasTraits.__init__(self, **traits)
         self.set_derived_parameters()
         
     @on_trait_change('keV')

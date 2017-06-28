@@ -17,8 +17,8 @@ class System(HasTraits):
     name = Str('Main System')
 #    _tags = List([microscope, 'dimmension'], label='Tags')
 #    _tags2 = List([], label='Tags')
-    microscope = Instance(Microscope, (), desc='Microscope parameters', label='Microscope')
-    dimensions = Instance(Spectrum_dimensions, (), desc='Energy and momentum dimensions', label='Dimmensions')
+    microscope = Instance(Microscope, desc='Microscope parameters', label='Microscope')
+    dimensions = Instance(Spectrum_dimensions, desc='Energy and momentum dimensions', label='Dimmensions')
     
     trait_view = View(
             Item('name', style='readonly'),
@@ -31,12 +31,14 @@ class System(HasTraits):
         resizable = True)
     
     def __init__(self, **traits):
-        HasTraits.__init__(self, **traits)
-        self.add_microscope()
+        super().__init__(**traits)
+        self.add_microscope(**traits)
+        self.dimensions = Spectrum_dimensions(**traits)
         self.dimensions._parent_system = self
         #self.add_trait('_tags2', [self.microscope, 'dimmension', 'test'])
 
-    def add_microscope(self):
+    def add_microscope(self, **traits):
+        self.microscope = Microscope(**traits)
         self.microscope._parent_system = self
         
     def add_tag(self):
@@ -51,5 +53,5 @@ class System(HasTraits):
 
 
 if __name__ == '__main__':
-    system_test = System()
+    system_test = System(keV=20)
     system_test.configure_traits()
