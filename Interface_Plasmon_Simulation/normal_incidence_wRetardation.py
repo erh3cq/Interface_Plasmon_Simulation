@@ -7,11 +7,14 @@ Created on Thu Mar 23 19:06:40 2017
 
 Egerton pg 162
 
-Generate an Energy loss spectra with
--Volume Plasmon (Cˇerenkov-enhanced)
--Surface Plasmon
--Guided-light modes
+Generate an Energy loss spectrum with:
+ * Volume Plasmon (Cerenkov-enhanced)
+ * Surface Plasmon
+ * Guided-light modes
 
+Notes:
+ * eps[i] refers to the dielectric constant relative to vacuum (ie :math:`\epsilon_r` in :math:`\epsilon=\epsilon_r \epsilon_0`)
+ * mu is the same as microscope.gamma for an electron moving through vacuum (ie :math:`\mu=\gamma=1-v^2/c^2`)
 """
 
 from __future__ import division, print_function
@@ -27,7 +30,7 @@ eps0=8.85E-12#[C^2/N m]
 
 class double_differential_cross_section_normalIncidence():
     def __init__(self, microscope, spectrum, materials, t):
-        self.beta2 = microscope.v2_c2
+        self.beta2 = microscope.beta2
         self.q_parallel = spectrum.E/(hbar*microscope.v)
         
         ###set material parameters
@@ -48,7 +51,7 @@ class double_differential_cross_section_normalIncidence():
         self.theta2 = (spectrum.q_perpendicular/microscope.k0)**2
         self.thetaE2 = (spectrum.E/(2*microscope.gamma*microscope.T))**2 #(spectrum.E/(hbar*microscope.v*microscope.k0))**2
 
-        self.lambda2 = self.theta2 - self.eps[1] * self.thetaE2 * self.beta2
+        self.lambda2 = self.theta2 * (1 - self.eps[1] * self.beta2)#self.theta2 - self.eps[1] * self.thetaE2 * self.beta2
         self.lambda02 = self.theta2 - self.eps[0] * self.thetaE2 * self.beta2
         self.phi2 = self.lambda2 + self.thetaE2
         self.phi02 = self.lambda02 + self.thetaE2
