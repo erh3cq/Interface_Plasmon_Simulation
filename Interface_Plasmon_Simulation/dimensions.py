@@ -14,6 +14,36 @@ hbar=6.582E-16#[eV s]
 
 
 class Spectrum_dimensions(HasTraits):
+    """
+    Class containint the dimensions of the spectrum.
+    
+    Adjustable parameters
+    ----------------------
+    E_min : Float
+        Minimum energy loss of spectrum.
+        Units in eV.
+    E_max : Float
+        Maximum energy loss of spectrum.
+        Units in eV.
+    E_N : Int
+        Number of points to calcualte in the energy range.
+        Units in eV.
+    q_perpendicular_max : Float
+        Maximum momentum to calculate up to, that is transfered perpendicular to the incident beam.
+        Units in 1/m.
+    q_perpendicular_N : Int
+        Number of points to calcualte in the q_perpendicular range.
+        Units in 1/m.
+        
+    Derived parameters
+    -------------------
+    E : Array
+        Array from E_min to E_max consisting of E_N points.
+        Units in eV.
+    q_perpendicular : Array
+        Array from \+- q_perpendicular_max with q_perpendicular_N points.
+        Units in 1/m.
+    """
     _parent_system = Generic
     E_min = Float(5, desc='Minimum energy loss of spectrum', label='Minimum')
     E_max = Float(20, desc='Maximum energy loss of spectrum', label='Maximum')

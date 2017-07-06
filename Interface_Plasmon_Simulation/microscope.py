@@ -19,11 +19,57 @@ m0c2=511.#[keV]
 eps0=8.85E-12#[C^2/N m]
 
 class Microscope(HasTraits):
+    """
+    Microscope class that derives important parameters based on input such as the accelerating voltage.
+    
+    Adjustable parameters
+    ----------------------
+    Input parameters that are adjustable.
+    
+    name : Str
+        The name of the microscope.
+    keV : Int
+        Accelerating voltage.
+        Units in keV.
+    resolution : Float
+        Energy resolution of the microscope (ie FWHM of the ZLP).
+        Units in eV.
+    dispersion : Float
+        Energy dispersion of the spectrometer.
+        Units in eV.
+    collection_angle : Float
+        Spectrometr collection semi-angle.
+        Units in mrad.
+    
+    Derived parameters
+    -------------------
+    :math:`β^2` : Float
+        Relativistic velocity to light.
+        :math:`\β^2=v^2/c^2`
+    :math:`\gamma` : Float
+        Relativistic factor for an electron in vacuum.
+        :math:`\gamma^2=1-v^2/c^2`
+    v : Float
+        Velocity of the electrons in vacuum.
+        Units in m/s.
+    T : Float
+        Kinetic energy of the electrons.
+        Units in keV
+    :math:`k_0` : Float
+        Wave number.
+        Units in 1/m.
+    """
     _parent_system = None
     name = Str('User specified', desc='Name of the microscope', label='Name')
     keV = Int(100, desc='Accelerating voltage', label='keV')
-    gamma = Float(desc='', label='gamma')
-    v2_c2 = Float(desc='Speed as a fraction of the speed of light', label='v2/c2')
+    
+    beta2 = Float(desc='Relativistic factor, beta=v/c', label='beta^2') #Note v2/c2=eps_r*v2/c2[vac]
+    gamma = Float(desc='Relativistic factor in vacuum, gamma^2=1-(v/c)^2', label='gamma')
+    ################ gamma2=1-v2/c_mat2
+    #                      =1-v2*eps_0*eps_r
+    #                      =1-eps_r*v2/c_vac2
+    ################same as mu in scattering for eps_r=1
+    
     v = Float(desc='Velocity', label='v [m/s]')
     T = Float(desc='Kinetic energy', label='T [keV]')
     k0 = Float(desc='Wave number', label='k0 [1/m]')
@@ -36,7 +82,7 @@ class Microscope(HasTraits):
             Item('name'),
             'keV',
             Item('gamma', style='readonly', format_str='%.3f'),
-            Item('v2_c2', style='readonly', format_str='%.3f'),
+            Item('beta', style='readonly', format_str='%.3f'),
             Item('v', style='readonly', format_str='%.3E'),
             Item('T', style='readonly', format_str='%.3E'),
             Item('k0', style='readonly', format_str='%.3E'),
@@ -57,17 +103,11 @@ class Microscope(HasTraits):
     @on_trait_change('keV')
     def set_derived_parameters(self):
         self.gamma = 1 + self.keV/m0c2 #[au]        
-        self.v2_c2 = self.keV * (self.keV + 2 * m0c2)/(self.keV + m0c2)**2 #[au]
-        self.v = c * np.sqrt(self.v2_c2) #[m/s]
+        self.beta = self.keV * (self.keV + 2 * m0c2)/(self.keV + m0c2)**2 #[au]
+        self.v = c * np.sqrt(self.beta) #[m/s]
         self.T = m0*self.v**2/(2*e) #m0c2/2 * (self.v/c)**2 #[keV]
         
         self.k0 = m0*self.v*self.gamma/(hbar*e) #[1/m]
-        
-    ##############################
-    ##############################
-    # Add change catches for keV #
-    ##############################
-    ##############################
 
     def print_parameters(self):
         print('Microscope')
