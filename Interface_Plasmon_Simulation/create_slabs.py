@@ -5,11 +5,37 @@ Created on Mon Apr  3 13:31:02 2017
 @author: mse334
 """
 import numpy as np
-from traits.api import HasTraits, Float, List, Instance, on_trait_change
+from traits.api import HasTraits, Float, List, Instance, Str, on_trait_change
 from traitsui.api import *
-        
-class create_sample():
-    def __init__(self, slabs, spectrum_dimmensions, interface_angle=0):
+from materials import material, Al, GB, vac, Al2O3
+
+
+class slab(HasTraits):
+    """
+    """
+    material = Instance(material)
+    def __init__(self, **traits):
+        super().__init__(**traits)
+    
+class sample(HasTraits):
+    """
+    Class to construc a system of slabs, and define properties that are dependent on other slabs.
+    
+    Adjustable parameters
+    ----------------------
+    slabs : List
+        List of individual slabs with each slab consisting of particular properties.
+    interface_angle : Float
+        Angle of the slab-slab interface. Note, the interfaces of a n>2 system currently must be parallel. # TODO: create non-parallel system
+        Units in [] # TODO: Set units
+    
+    """
+    slabs = List(Instance(slab), desc='List of individual slabs with each slab consisting of particular properties.', label='Slab list')
+    interface_angle = Float(0, desc='Angle of the slab-slab interface.', label='Interface angle')
+    
+    
+    def __init__(self, slabs, spectrum_dimmensions, interface_angle=0, **traits):
+        super().__init__(**traits)
         self.slabs = slabs
         self.interface_angle = interface_angle
         self.set_slab_positions()
@@ -38,8 +64,7 @@ class create_sample():
                 _info(index)
         else:
             _info(slab)
-            
-            
+
 #class slab_system():
 #    def __init__(self, slabs, z, energy ,q_perpendicular, interface_angle=2E-3):
 #        self.slabs = slabs
@@ -70,3 +95,6 @@ class create_sample():
 #                _info(index)
 #        else:
 #            _info(slab)
+if __name__ == '__main__':
+    slab_test = slab(material=Al)
+    slab_test.configure_traits()
