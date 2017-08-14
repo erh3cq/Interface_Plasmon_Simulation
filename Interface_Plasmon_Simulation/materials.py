@@ -7,7 +7,7 @@ Created on Sun Dec  4 17:11:43 2016
 
 from __future__ import division
 import numpy as np
-from traits.api import HasTraits, Float, Int, Str, Inctance, on_trait_change
+from traits.api import HasTraits, Float, Int, Str, Instance, on_trait_change, Array
 from traitsui.api import *
 import scipy as sp
 
@@ -19,9 +19,14 @@ m0c2=511E3#[eV]
 eps0=8.85E-12#[C^2/N m]
 
 class xtal(HasTraits):
-    name = 'Simple cumic'
-    lattice = np.array([1,0,0],[0,1,0],[0,0,1])
+    name = Str('Simple cumic')
+    lattice = Array(Int())
     basis = np.array([[0,0,0]])
+    traits_view = View('name',
+                       HGroup(Label('a0: ['),Item(name='lattice')))
+    def __init__(self, **traits):
+        super().__init__(**traits)
+        self.lattice = np.array([[1,0,0],[0,1,0],[0,0,1]])
 
 FCC = xtal(name='FCC',
            lattice = np.array([[0,1/2,1/2],[1/2,1/2,0],[1/2,0,1/2]]))
@@ -33,26 +38,28 @@ diamond = xtal(name='Diamond',
 
 class material(HasTraits):
     name = Str('General material')
-    a1 = Float(1E-9)
-    a2 = Float(1E-9)
-    a3 = Float(1E-9)
+    a1 = Float(1E-9, desc='Lattice parameter [m]')
+    a2 = Float(1E-9, desc='Lattice parameter [m]')
+    a3 = Float(1E-9, desc='Lattice parameter [m]')
     dz = Float(1, desc='Density adjustment factor (ex. on average 1 of 4 atoms in FCC is missing then dz=0.75)')
     valance_electrons = Int(3, desc='Valance electrons per basis')
-    dE = Float(10, label='Dampaning')
+    dE = Float(10, label='Dampaning [eV]')
     E_b = Float(0, label='Band gap energy [eV]')
     r = Float(0.118E-9, label='Atomic radius [m]')
-    xtalType = Inctance(xtal, (), Label='Crystal type')
+    xtal = Instance(xtal, (), Label='Crystal')
+    print(xtal.lattice)
     density = Float(2.702, label='Density [g/m^3]')
-    atomic_mass = Float(26.9815385, label='Atomic mass [kg])
+    atomic_mass = Float(26.9815385, label='Atomic mass [kg]')
+    n_a = Float(label='Atomic density')
     def __init__(self, **traits):
         super().__init__(**traits)
 #        if a2 is None: self.a2=a1
 #        else: self.a2=a2
 #        if a3 is None: self.a3=a1
 #        else: self.a3=a3
-        self.damp=dE/hbar
+        self.damp=self.dE/hbar
         #self.n=self.valance_electrons*self.density*10**3/self.A #[1/m^3]
-        self.na = (np.size(self.lattice,axis=1)+1)/(self.a1*self.a2*self.a3) #atoms/[m]^3
+        self.na = (xtal.basis[0].size+1)/(np.dot(self.a1*xtal.lattice[0],np.cross(self.a2*xtal.lattice[1],self.a3*xtal.lattice[2]))) #atoms/[m]^3
         self.n=self.valance_electrons*self.na*self.dz #e-/[m]^3
         self.omegaP=sp.sqrt(self.n*e**2/(eps0*m0)) #[1/s]
         self.energyP=sp.sqrt(self.n*e**2/(eps0*m0))*hbar #[eV]
@@ -99,3 +106,9 @@ Mg2Si=material(name="Mg2Si", a1=0.635E-9, valance_electrons=(2*2+4), E_b=4.6)
 SiO2=material(name="SiO2", a1=0.4913E-9, a2=0.5405E-9, valance_electrons=(4+2*6), E_b=8.9)
 
 Si=material(name='Si', a1=0.54307E-9, valance_electrons=2*4, dE=3.7, xtalType='Diamond')
+
+if __name__ == '__main__':
+    print(np.array([0,1]))
+    test_mat = material()
+    test_mat.configure_traits()
+    
