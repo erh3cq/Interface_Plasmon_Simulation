@@ -5,115 +5,45 @@ Created on Mon Jun 12 11:38:34 2017
 @author: mse334
 """
 
-from traits.api import HasTraits, HasPrivateTraits, Float, Enum, Str, Instance, on_trait_change, Any, Generic,Undefined, Trait
-from traitsui.api import *
+from traits.api import HasTraits, Float, Str, Instance, on_trait_change, Array
+from traitsui.api import Item, View, Label, HGroup
+import numpy as np
 
-class Microscope(HasTraits):
-#    parent_system = Instance(Undefined)#Generic
-    _parent_system = None
-    inp = Float(0)
-    out = Float(0)
+class vector(HasTraits):
+    mag = Float(desc="Lattice parameter")
+    hat = Array(np.int, shape=(3,), value=np.array([0,0,0]))
+    hat_view = Array(shape=(1,3), value=hat.T)
+
+    def _hat_view_changed(self):
+        self.hat = self.hat_view[0].T
+        print(self.hat)
         
-#    @on_trait_change('parent_system')
-#    def _parent_sys_changed(self):
-#        self.__parent_sys = self
-#        print('parent system set to: ', self.parent_system.name)
-
-    @on_trait_change('inp')
-    def _parent_sysN_changed(self):
-        print('Input(scope) changed to: ', self.inp)
-        self.out = self.inp
-        
-#   WORKS
-#    def _parent_sysN_changed(self):
-#        print('parent system set to: ', self.parent_system.name)
-#        self.out = self.inp    
-
+    traits_view = View(HGroup(Item('mag',show_label=False),Label('[m] * ['),Item('hat_view',show_label=False),Label(']')))
     def __init__(self, **traits):
-        HasTraits.__init__(self, **traits)
-        self.add_trait('name',Enum('Titan','Themis','Nion'))
+        super().__init__(**traits)
+        if 'hat' in traits: self.hat_view = [traits['hat']]
+#        print(self.hat[np.newaxis])
 
-    trait_view = View(Item(name = 'name'),
-#                      Item(name = 'parent_system'),
-                      Group(Item(name = 'inp'),
-                            Item(name = 'out'),
-                            label = '%s parameters'%inp,
-                            show_border = True))
-        
-
-class Dimensions(HasTraits):
-    def __init__(self):
-        self.number = 'two'
-
-class System(HasTraits):
-    name = Str('Main System')
-    scope = Instance(Microscope, (), desc='Microscope parameters', label='Microscope')
-    dimmension = Instance(Dimensions, desc='Energy and momentum dimensions', label='Dimmensions')
-    
-    inp = Float(0, label='Input')
-    output = Float(0)
-    @on_trait_change('inp')
-    def _inp_changed(self):
-        self.output = self.inp
-        print('Input (system) changed to',self.inp)
-    
-    def __init__(self, **traits):
-        HasTraits.__init__(self, **traits)
-        self.initialized = 'Yes'
-        self.add_microscope()
-        self.axis = Dimensions()
-        
-    trait_view = View(
-            Item('name', style='readonly'),
-            Group(
-                    Item(name = 'scope', style = 'custom', show_label = False, dock = 'tab'),
-                    Group(
-                            Item(name = 'inp'),
-                            Item(name = 'output'),
-                            label = 'System parameters',
-                            dock = 'tab'),
-                    show_border = True,
-                    layout = 'tabbed'),
-        title = '',
-        resizable = True)
-        
-        
-    def add_microscope(self):
-#        self.scope = Microscope()
-#        self.scope.parent_system.klass = self
-#        self.scope.parent_system = self
-        Microscope.add_class_trait('parent_system',Instance(self))
-        self.scope.parent_system = self
-        self.scope._parent_system = self
-        print('Added scope with value of:',self.scope.parent_system)
-        
-           
-#tester = System()
-#print(tester.trait('parent_system').default_kind) 
-#tester.configure_traits()
-
-print('\n')
+#vector(hat=[0,1,0]).configure_traits()
 
 class EchoBox(HasTraits):
-    pre_inp = Float(label='Pre-input')
-    inp1 = Float(1)
-#    inp1 = 1.0
-    inp2 = Float(2)
-#    inp2 = 2
-    output = Generic(inp1+inp2)
-    trait_view = View(Group(Item(name = 'inp1'),
-                            Item(name = 'inp2'),
-                             Item(name = 'output'),
-                             label = 'Section',
-                             show_border = True))
+    name = Str('Test')
+    a1 = Instance(vector, kw={'hat':[1,0,0]})
+    a2 = Instance(vector(hat=[0,1,0]),())
+    a3 = Instance(vector, ())
+#    a2_mag = Float(desc="Lattice parameter")
+#    a2_hat = Array(np.int, shape=(3), value=np.array([0,1,0]))
+#    a3_mag = Float(desc="Lattice parameter")
+#    a3_hat = Array(np.int, shape=(3), value=np.array([0,0,1]))
     
-    @on_trait_change(['inp1','inp2'])
-    def _inp_changed(self):
-        self.output = self.inp1+self.inp2
-
-#        EchoBox.add_class_trait('_inp',Float(1., depends_on='pre_inp'))
-        
-box = EchoBox()
-
+#    ar = Array(np.int, shape=(3,3), value=np.array([[1,0,0],[0,1,0],[0,0,1]]))
+    traits_view = View('name',
+                       Item(name='a1', style = 'custom'),
+                       Item(name='a2', style = 'custom'),
+                       Item(name='a3', style = 'custom'))
+    def __init__(self, **traits):
+        super().__init__(**traits)
+     
+box = EchoBox(a3=vector(hat=[0,0,1]))
 box.configure_traits()
-    
+print(np.zeros((1,3)))
