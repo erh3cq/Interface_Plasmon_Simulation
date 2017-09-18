@@ -60,10 +60,6 @@ class Microscope(object):
         Units in 1/m.
     """
     
-    
-    
-    
-        
     def __init__(self, keV=100, resolution=0.05, dispersion=0.05, collection_angle=2E-3, **traits):
         name = 'User specified' #desc='Name of the microscope', label='Name')
     
