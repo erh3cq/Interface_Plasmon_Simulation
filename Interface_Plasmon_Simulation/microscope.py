@@ -6,8 +6,6 @@ Created on Thu Mar 23 17:52:20 2017
 """
 
 from __future__ import division, print_function
-from traits.api import HasTraits, Float, Int, Str, Instance, on_trait_change
-from traitsui.api import *
 import numpy as np
 
 hbar=6.582E-16#[eV s]
@@ -77,7 +75,7 @@ class Microscope(object):
         #                      =1-eps_r*v2/c_vac2
         ################same as mu in scattering for eps_r=1
         self.beta2 = self.keV * (self.keV + 2 * m0c2)/(self.keV + m0c2)**2 #[au] beta=v/c', label='beta^2' #Note v2/c2=eps_r*v2/c2[vac]
-        self.v = c * np.sqrt(self.beta) #[m/s]
+        self.v = c * np.sqrt(self.beta2) #[m/s]
         self.T = m0*self.v**2/(2*e) #m0c2/2 * (self.v/c)**2 #[keV]
         
         self.k0 = m0*self.v*self.gamma/(hbar*e) #[1/m]
@@ -85,8 +83,9 @@ class Microscope(object):
     def print_parameters(self):
         print('Microscope')
         for each in self.__dict__:
-            print(each,': ',self.__dict__[each])
+            print(' ',each,': ',self.__dict__[each])
         print()
 
 if __name__ == '__main__':   
     test_scope = Microscope(keV=100)
+    test_scope.print_parameters()
