@@ -40,20 +40,22 @@ def kroger(microscope, material=None, x=None, x0=0, t=100E-9,
         except ValueError:
             print('eps has not been set.')
             
-            
-    q_parallel = np.sqrt((kappa/microscope.v)**2+q_perpendicular**2)
-    q_x1 = np.sqrt(q_parallel**2 - ((E/hbar)/c)**2 * eps1)
-    q_x2 = np.sqrt(q_parallel**2 - ((E/hbar)/c)**2 * eps2)
+    
     kappa = E/hbar #E/hbar + ky*vy
+    q_parallel1 = np.sqrt(q_perpendicular**2 - ((E/hbar)/c)**2 * eps1)#np.sqrt((kappa/microscope.v)**2+q_perpendicular**2)
+    q_parallel2 = np.sqrt(q_perpendicular**2 - ((E/hbar)/c)**2 * eps2)
+    q_x1 = np.sqrt(q_parallel1**2 + (kappa/microscope.v)**2)
+    q_x2 = np.sqrt(q_parallel2**2 + (kappa/microscope.v)**2)
+    q_x12 = np.sqrt(q_perpendicular**2 + (kappa/microscope.v)**2 - ((E/hbar)/c)**2 * (eps1 + eps2) )
     
     gamma = 1 - eps2 * microscope.beta2
     
     pre = e**2/(np.pi*ehbar*(microscope.v)**2*eps0) / hbar #[1/(eV m^2)]
     pre_2 = -2*(eps2-eps1)**2/(q_x1**4*q_x2**4)
     
-    L_s = 
-    L_as = 
-    B = 
+    L_s = q_parallel1*eps2 + q_parallel2*eps1 * np.tanh(q_parallel1*t/2)
+    L_as = q_parallel1*eps2 + q_parallel2*eps1 * 1/np.tanh(q_parallel1*t/2)
+    B = q_perpendicular*q_x12**2 + eps1*eps2*microscope.beta2*(E/hbar / microscope.v)#*np.sin(theta_n)*np.cos(q_x1)
     
     #f_decay = q_parallel * np.exp(2*q_parallel*np.abs(x-x0))
     #f_interface = pre * np.imag(f_decay * -2/(eps2+eps1))
@@ -61,7 +63,7 @@ def kroger(microscope, material=None, x=None, x0=0, t=100E-9,
     f_bulk = pre * np.imag(1/q_x2**2 * gamma/eps2) * t
     f_interface1 = pre * np.imag(pre_2*(np.sin(kappa/microscope.v*t/2)**2/L_s+np.cos(kappa/microscope.v*t/2)**2/L_as) * B**2/(eps1*eps2))
     
-    return f_bulk
+    return f_bulk, f_interface1
 
     
 
@@ -91,16 +93,23 @@ if __name__ == '__main__':
     
     
     
-    bulk = kroger(microscope, material=materials,
+    bulk, interface1 = kroger(microscope, material=materials,
                        x=x, q_perpendicular=q_perpendicular, E=E)
     print(bulk[0,:,:])
 
 
-    fig, ax1 = plt.subplots(1, 1)
+    fig, [ax1, ax2] = plt.subplots(2, 1)
     img1 = ax1.imshow(bulk[0,:,:], aspect='auto', origin='lower',
                      extent=(np.amin(E),np.amax(E), np.amin(q_perpendicular), np.amax(q_perpendicular)))
     plt.xlabel('E [eV]')
     plt.ylabel(r'$q_{y} [m^-]$')
     fig.colorbar(img1, ax=ax1)
+    
+    img2 = ax2.imshow(interface1[0,:,:], aspect='auto', origin='lower',
+                     extent=(np.amin(E),np.amax(E), np.amin(q_perpendicular), np.amax(q_perpendicular)))
+    plt.xlabel('E [eV]')
+    plt.ylabel(r'$q_{y} [m^-]$')
+    fig.colorbar(img2, ax=ax2)
+    
     
     plt.show()
