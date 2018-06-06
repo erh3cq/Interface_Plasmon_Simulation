@@ -15,92 +15,9 @@ eps0=8.85E-12#[C^2/N m]
 hbar=6.582E-16#[eV s]
 ehbar = hbar*e #1.055E-34[J s]
 
-def twoSlabParallel_NR(microscope, material=None, x=None, x0=0,
-                       q_perpendicular=None, E=None):
-    """
-    
-    """
-    
-#    x,q_perpendicular,E = np.meshgrid(x,q_perpendicular,E, indexing='ij')
-    
-    if q_perpendicular is None:
-        raise Exception('twoSlabParallel requires q_perpendicular to be set.')
-    elif isinstance(q_perpendicular, np.ndarray) is False:
-        raise Exception('q_perpendicular must be a numpy array.')
-    if E is None:
-        raise Exception('twoSlabParallel requires E to be set.')
-    elif isinstance(E, np.ndarray) is False:
-        raise Exception('E must be a numpy array.')
-    if len(material)!=2:
-        raise Exception('material must be a list or array of length 2.')
-    else:
-        try:
-            eps1 = material[0].eps
-            eps2 = material[1].eps
-        except ValueError:
-            print('eps has not been set.')
-            
-    q_parallel = np.sqrt(((E/hbar)/microscope.v)**2+q_perpendicular**2)
-
-    pre = 2*e**2/(np.pi*ehbar*(microscope.v*q_parallel)**2*eps0) / hbar #[1/(eV m^2)]
-    
-    
-    f_decay = q_parallel * np.exp(2*q_parallel*np.abs(x-x0))
-    f_interface = pre * np.imag(f_decay * -2/(eps2+eps1))
-    f_begrenzung = pre * np.imag(f_decay * 1/eps1)
-    
-    return f_interface, f_begrenzung
 
 def twoSlabParallel(microscope, material=None, x=None, x0=0,
-                       q_perpendicular=None, E=None):
-    """
-    Model for an electorn with initial trajectory in the +z direction,
-    parallel to an interface that has a normal in the +x direction.
-    y is therefore the direction in the plane not parallel to the velocity.
-    The electron is in material 1.
-    Garcia de 
-    
-    q_xi: Momentum transfer in the direction parallel to the beam in material i.
-    q_parallel: Momentum transfer parallel to the interface normal.
-    q_perpendicular: Momentum transfer perpendicular
-                    to the interface normal and the beam (ie. q_x x q_parallel)
-    """
-    
-#    x,q_perpendicular,E = np.meshgrid(x,q_perpendicular,E, indexing='ij')
-    
-    if q_perpendicular is None:
-        raise Exception('twoSlabParallel requires q_perpendicular to be set.')
-    elif isinstance(q_perpendicular, np.ndarray) is False:
-        raise Exception('q_perpendicular must be a numpy array.')
-    if E is None:
-        raise Exception('twoSlabParallel requires E to be set.')
-    elif isinstance(E, np.ndarray) is False:
-        raise Exception('E must be a numpy array.')
-    if len(material)!=2:
-        raise Exception('material must be a list or array of length 2.')
-    else:
-        try:
-            eps1 = material[0].eps
-            eps2 = material[1].eps
-        except ValueError:
-            print('eps has not been set.')
-            
-    q_parallel = np.sqrt(((E/hbar)/microscope.v)**2+q_perpendicular**2) #np.sqrt(((E/hbar)/c*microscope.beta)**2+q_perpendicular**2)
-    q_x1 = np.sqrt(((E/hbar)/c)**2 * eps1 - q_parallel**2)
-    q_x2 = np.sqrt(((E/hbar)/c)**2 * eps2 - q_parallel**2)
-    pre = 2*e**2/(np.pi*ehbar*(microscope.v*q_parallel)**2*eps0) / hbar #[1/(eV m^2)]
-    r_p = (eps2*q_x1 - eps1*q_x2)/(eps2*q_x1 + eps1*q_x2)
-    r_s = (q_x1 - q_x2)/(q_x1 + q_x2)
-    
-    
-    f_decay = q_x1 * np.exp(2j*q_x1*np.abs(x-x0))
-    f_interface_s = pre * np.real(f_decay * ((q_perpendicular/q_x1)**2 * (microscope.v/c)**2 *r_s))
-    f_interface_p = pre * np.real(f_decay * (-1/eps1 * r_p))
-    
-    return f_interface_s, f_interface_p
-
-def twoSlabParallel_2(microscope, material=None, x=None, x0=0,
-                       q_perpendicular=None, E=None):
+                       q_y=None, q_parallel=None, E=None, NR=False):
     """
     Model for an electorn with initial trajectory in the +z direction,
     parallel to an interface that has a normal in the +x direction.
@@ -108,18 +25,20 @@ def twoSlabParallel_2(microscope, material=None, x=None, x0=0,
     The electron is in material 1.
     Wang 1996
     
-    q_xi: Momentum transfer in the direction parallel to the beam in material i.
-    q_parallel: Momentum transfer parallel to the interface normal.
-    q_perpendicular: Momentum transfer perpendicular
+    q_xi: Momentum transfer of a SP in the direction normal to an interface.
+    q_parallel: Momentum transfer of a SP parallel to the electrons trajectory.
+    q_y: Momentum transfer perpendicular
                     to the interface normal and the beam (ie. q_x x q_parallel)
     """
     
 #    x,q_perpendicular,E = np.meshgrid(x,q_perpendicular,E, indexing='ij')
-    
-    if q_perpendicular is None:
-        raise Exception('twoSlabParallel requires q_perpendicular to be set.')
-    elif isinstance(q_perpendicular, np.ndarray) is False:
-        raise Exception('q_perpendicular must be a numpy array.')
+    if NR is True:
+        print('NR')
+        microscope.beta2 = 0
+    if q_y is None and q_parallel is None:
+        raise Exception('twoSlabParallel requires q_y or q_parallel to be set.')
+    elif isinstance(q_y, np.ndarray) is False and isinstance(q_parallel, np.ndarray) is False:
+        raise Exception('q_y must be a numpy array.')
     if E is None:
         raise Exception('twoSlabParallel requires E to be set.')
     elif isinstance(E, np.ndarray) is False:
@@ -132,21 +51,26 @@ def twoSlabParallel_2(microscope, material=None, x=None, x0=0,
             eps2 = material[1].eps
         except ValueError:
             print('eps has not been set.')
-            
-    q_parallel = np.sqrt(((E/hbar)/microscope.v)**2+q_perpendicular**2) #np.sqrt(((E/hbar)/c*microscope.beta)**2+q_perpendicular**2)
-    q_x1 = np.sqrt(q_parallel**2 - ((E/hbar)/c)**2 * eps1)
-    q_x2 = np.sqrt(q_parallel**2 - ((E/hbar)/c)**2 * eps2)
-    gamma = 1 - eps1 * microscope.beta2
-    pre = e**2/(np.pi*ehbar*(microscope.v)**2*eps0) / hbar #[1/(eV m^2)]
-    f_1 = 2*(eps2 - eps1)*q_x1 / (eps1*(q_x1+q_x2)*(eps2*q_x1 + eps1*q_x2))
-    f_2 = -1*gamma/(eps1*q_x1) * (q_x1 - q_x2)/(q_x1 + q_x2)
     
+    gamma2 = 1 - eps1 * microscope.beta2
     
-    f_decay = np.exp(-2*q_x1*np.abs(x-x0))
-    #f_interface_s = pre * np.real(f_decay * ((q_perpendicular/q_x1)**2 * (microscope.v/c)**2 *r_s))
-    #f_interface_p = pre * np.real(f_decay * (-1/eps1 * r_p))
+    if q_parallel is None:
+        q_parallel = np.sqrt(((E/hbar)/microscope.v)**2+q_y**2)
+    q_x1 = np.sqrt(q_parallel**2 - ((E/hbar)/microscope.v)**2 * eps1 * microscope.beta2)
+    q_x2 = np.sqrt(q_parallel**2 - ((E/hbar)/microscope.v)**2 * eps2 * microscope.beta2)
+    pre = e**2/(2*np.pi**2*ehbar*(microscope.v)**2*eps0) / hbar #[1/(eV m^2)]
     
-    return pre*np.imag(f_1*f_decay), pre*np.imag(f_2*f_decay)
+    #f_1 = 2*(eps2 - eps1)*q_x1 / (eps1*(q_x1+q_x2)*(eps2*q_x1 + eps1*q_x2))
+    #f_2 = -1*gamma/(eps1*q_x1) * (q_x1 - q_x2)/(q_x1 + q_x2)
+    
+    f_decay = np.real(np.exp(-2*q_x1*np.abs(x-x0)))
+    f_pre = 1/(q_x1 + q_x2)
+    f_1 = pre * np.imag(-2 * (q_x1 + q_x2)/(q_x1*eps2 + q_x2*eps1) * f_pre)* f_decay
+
+    f_2 = pre * np.imag(2/eps1 * f_pre)* f_decay
+    f_3 = pre * np.imag(-1*gamma2/eps1 * (q_x1 - q_x2)/q_x1 * f_pre)* f_decay
+    
+    return f_1, f_2, f_3
 
 def dispersion(material=None, E=None):
     eps1 = material[0].eps
@@ -166,6 +90,10 @@ if __name__ == '__main__':
     E = np.arange(0.001,17,0.01)
     q_perpendicular = np.arange(0,200,0.05)*1E6
     
+    x = x[:,np.newaxis,np.newaxis]
+    q_perpendicular = q_perpendicular[np.newaxis,:,np.newaxis]
+    E = E[np.newaxis,np.newaxis,:]
+    
     materials = [Al, vac]
     for material in materials:
         print(material.name)
@@ -179,14 +107,14 @@ if __name__ == '__main__':
                        x=x, q_perpendicular=q_perpendicular, E=E)
     
     fig, [ax1, ax2] = plt.subplots(2, 1)
-    img1 = ax1.imshow(interface[:,-1,:], aspect='auto', norm=pltc.LogNorm(), origin='lower',
+    img1 = ax1.imshow(interface[-1,:,:], aspect='auto', norm=pltc.LogNorm(), origin='lower',
                      extent=(np.amin(E),np.amax(E), np.amin(q_perpendicular), np.amax(q_perpendicular)))
     plt.xlabel('E [eV]')
     plt.ylabel(r'$q_{y} [m^-]$')
     fig.colorbar(img1, ax=ax1)
 #    plt.colorbar()
     
-    img2 = ax2.imshow(begrenzung[:,-1,:], aspect='auto', origin='lower',
+    img2 = ax2.imshow(begrenzung[-1,:,:], aspect='auto', origin='lower',
                  extent=(np.amin(E),np.amax(E), np.amin(q_perpendicular), np.amax(q_perpendicular)))
     plt.xlabel('E [eV]')
     plt.ylabel(r'$q_{y} [m^-]$')
@@ -196,14 +124,14 @@ if __name__ == '__main__':
                        x=x, q_perpendicular=q_perpendicular, E=E)
     
     fig, [ax1, ax2] = plt.subplots(2, 1)
-    img1 = ax1.imshow(interface_s[:,-1,:], aspect='auto', origin='lower',
+    img1 = ax1.imshow(interface_s[-1,:,:], aspect='auto', origin='lower',
                      extent=(np.amin(E),np.amax(E), np.amin(q_perpendicular), np.amax(q_perpendicular)))
     plt.xlabel('E [eV]')
     plt.ylabel(r'$q_{y} [m^-]$')
     fig.colorbar(img1, ax=ax1)
 #    plt.colorbar()
     
-    img2 = ax2.imshow(interface_p[:,-1,:], aspect='auto', origin='lower',
+    img2 = ax2.imshow(interface_p[-1,:,:], aspect='auto', origin='lower',
                  extent=(np.amin(E),np.amax(E), np.amin(q_perpendicular), np.amax(q_perpendicular)))
     plt.xlabel('E [eV]')
     plt.ylabel(r'$q_{y} [m^-]$')
